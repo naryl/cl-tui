@@ -1,0 +1,10 @@
+* Init/destroy
+* Area definition with callbacks to redraw
+** Redraw on window size change or request
+** Windows with borders
+* Functions to draw stuff
+* row/column layouters with weight and limits
+* Scrolling text areas
+* Cell-drawing areas
+* Colors
+* Input handling (global)
