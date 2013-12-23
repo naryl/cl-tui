@@ -1,7 +1,9 @@
 
 (defpackage cl-tui
-  (:use :cl
-        :cl-charms)
+  (:use :cl)
   (:export #:init-screen
            #:destroy-screen
+
+           #:refresh
+           #:callback-frame
    ))

@@ -10,17 +10,27 @@
   (when *running*
     (error "Screen is already initialized"))
   (setf *running* t)
-  (initscr)
-  (clear)
-  (raw)
-  (keypad *stdscr* 1)
-  (noecho)
-  (setf *size* (list (getmaxy *stdscr*) (getmaxx *stdscr*)))
+  (cl-charms:initscr)
+  (cl-charms:clear)
+  (cl-charms:raw)
+  (cl-charms:keypad cl-charms:*stdscr* 1)
+  (cl-charms:noecho)
+  (setf *size* (list (cl-charms:getmaxy cl-charms:*stdscr*)
+                     (cl-charms:getmaxx cl-charms:*stdscr*)))
   nil)
 
 (defun destroy-screen ()
   (unless *running*
     (error "Screen is not initialized"))
-  (endwin)
+  (cl-charms:endwin)
   (setf *running* nil)
   nil)
+
+(defun refresh (frame)
+  (render (frame frame))
+  (cl-charms:refresh))
+
+;;; Root frame definition
+(setf (frame :root) (make-instance 'frame))
+
+(defvar *display* (frame :root))
