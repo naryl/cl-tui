@@ -9,6 +9,8 @@
            :initform nil)
    (children :type list
              :initform nil)
+   (window :initform nil
+           :documentation "Ncurses window object. Created on demand.")
    (max-w :type fixnum
           :initarg :max-w
           :initform 100500)
@@ -62,7 +64,22 @@
                (error "Not implemented")))))
 
 (defgeneric render (frame)
-  (:documentation "Displays the frame on screen"))
+  (:documentation "Displays the frame on screen")
+  (:method :before (frame)
+    (unless (slot-value frame 'window)
+      (create-window frame))))
+
+(defun create-window (frame)
+  (setf (slot-value frame 'window)
+        (cl-charms:newwin 10 10 10 10)))
+
+;;; Retained frame
+
+(defclass retained-frame (frame)
+  ())
+
+(defmethod render ((frame retained-frame))
+  nil)
 
 ;;; Callback frame
 
@@ -81,12 +98,6 @@
          :initform "")))
 
 (defmethod render ((frame text-frame))
-  (cl-charms:clear)
-  (cl-charms:addstr (slot-value frame 'text)))
-
-(defun clear (frame)
-  (setf (slot-value (frame frame) 'text) ""))
-
-(defun put-text (frame new-text)
-  (with-slots (text) (frame frame)
-    (setf text (concatenate 'string text new-text))))
+  (with-slots (window text) frame
+    (cl-charms:wclear window)
+    (cl-charms:waddstr window text)))

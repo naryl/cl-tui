@@ -6,5 +6,10 @@
            #:destroy-screen
 
            #:refresh
+           #:retained-frame
+           #:text-frame
            #:callback-frame
+
+           #:putchar
+           #:add-text
    ))
