@@ -15,6 +15,7 @@
   (cl-charms:raw)
   (cl-charms:keypad cl-charms:*stdscr* 1)
   (cl-charms:noecho)
+  (cl-charms:curs-set 0)
   (setf *size* (list (cl-charms:getmaxy cl-charms:*stdscr*)
                      (cl-charms:getmaxx cl-charms:*stdscr*)))
   nil)
@@ -26,15 +27,12 @@
   (setf *running* nil)
   nil)
 
-(defun refresh (frame)
+(defun refresh (&optional (frame :root))
   (labels ((render-tree (frame)
              (let ((frame (frame frame)))
-               (with-slots (window children) frame
-                 (render frame)
-                 (mapcar #'render-tree children)
-                 (cl-charms:wrefresh window)))))
-    (render-tree frame)
-    (cl-charms:refresh)))
+               (render frame)
+               (mapcar #'render-tree (slot-value frame 'children)))))
+    (render-tree frame)))
 
 ;;; Root frame definition
 (sunless (frame :root)

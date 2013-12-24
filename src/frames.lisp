@@ -66,16 +66,21 @@
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
   (:method :before (frame)
-    (unless (slot-value frame 'window)
-      (create-window frame))))
+    (ensure-window frame))
+  (:method :after (frame)
+    (cl-charms:wrefresh (slot-value frame 'window))))
 
-(defun create-window (frame)
-  (setf (slot-value frame 'window)
-        (cl-charms:newwin 10 10 10 10)))
+(defun ensure-window (frame)
+  (sunless (slot-value frame 'window)
+    (setf it (cl-charms:newwin 10 10 10 10))))
+
+;;; Canvas frame superclass (for frames allowed to use simple drawing functions)
+
+(defclass canvas-frame (frame) ())
 
 ;;; Retained frame
 
-(defclass retained-frame (frame)
+(defclass retained-frame (canvas-frame)
   ())
 
 (defmethod render ((frame retained-frame))
@@ -83,7 +88,7 @@
 
 ;;; Callback frame
 
-(defclass callback-frame (frame)
+(defclass callback-frame (canvas-frame)
   ((render :type function
            :initarg :render)))
 

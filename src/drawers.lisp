@@ -6,16 +6,17 @@
     `(defun ,name ,args
        (setf ,frame-var (frame ,frame-var))
        (check-type ,frame-var ,type)
+       (ensure-window ,frame-var)
        ,@body)))
 
-(defun/frame putchar retained-frame (frame x y c)
-  (with-slots (window) (frame frame)
+(defun/frame putchar canvas-frame (frame x y c)
+  (with-slots (window) frame
     (cl-charms:mvwaddstr window y x (string c))))
 
 ;;; Text frame-specific
 
 (defun/frame add-text text-frame (frame new-text)
-  (with-slots (text) (frame frame)
+  (with-slots (text) frame
     (setf text (concatenate 'string text new-text))))
 
 (defun/frame clear text-frame (frame)
