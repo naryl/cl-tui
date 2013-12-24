@@ -1,0 +1,26 @@
+* [X] Init/destroy
+* [o] Frame definition with callbacks to redraw
+ * [X] One frame
+ * [X] Redraw windows on request
+ * [X] Frames implemented with ncurses windows
+ * [X] Display frame on screen
+ * [ ] Redraw on window size change
+ * [ ] Frame hierarchy and relative placement
+ * [ ] Windows with borders
+* [o] Diffrent frame types
+ * [X] Frame that remembers what was drawn on it (like ncurses default)
+ * [X] Frame rendering on callback
+ * [ ] Frame rendering a cell buffer
+  * [ ] Frame itself
+  * [ ] ncurses pad-like functionality
+ * [.] Frame rendering text
+  * [X] Frame itself
+  * [ ] Auto line wrap
+  * [ ] Scrolling text frames
+  * [ ] Justified mode for text frame
+* [ ] Drawing functions
+ * [ ] Used for drawing text
+ * [ ] Colors
+ * [ ] Used by retained frame and callback frame
+ * [ ] Cell buffer manipulation functions
+* [ ] Input handling (global)
