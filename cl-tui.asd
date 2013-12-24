@@ -5,4 +5,5 @@
     :components ((:file "packages")
                  (:file "frames")
                  (:file "cl-tui"))
-    :depends-on (cl-charms))
+    :depends-on (cl-charms
+                 anaphora))

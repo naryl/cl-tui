@@ -71,4 +71,22 @@
            :initarg :render)))
 
 (defmethod render ((frame callback-frame))
+  (cl-charms:clear)
   (funcall (slot-value frame 'render)))
+
+;;; Text frame
+
+(defclass text-frame (frame)
+  ((text :type string
+         :initform "")))
+
+(defmethod render ((frame text-frame))
+  (cl-charms:clear)
+  (cl-charms:addstr (slot-value frame 'text)))
+
+(defun clear (frame)
+  (setf (slot-value (frame frame) 'text) ""))
+
+(defun put-text (frame new-text)
+  (with-slots (text) (frame frame)
+    (setf text (concatenate 'string text new-text))))

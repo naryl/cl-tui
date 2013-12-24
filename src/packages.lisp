@@ -1,6 +1,7 @@
 
 (defpackage cl-tui
-  (:use :cl)
+  (:use :cl
+        :anaphora)
   (:export #:init-screen
            #:destroy-screen
 

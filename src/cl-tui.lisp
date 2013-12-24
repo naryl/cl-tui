@@ -27,10 +27,14 @@
   nil)
 
 (defun refresh (frame)
-  (render (frame frame))
-  (cl-charms:refresh))
+  (flet ((render-tree (frame)
+           (render (frame frame))
+           (mapcar #'refresh (slot-value (frame frame) 'children))))
+    (render-tree frame)
+    (cl-charms:refresh)))
 
 ;;; Root frame definition
-(setf (frame :root) (make-instance 'frame))
+(sunless (frame :root)
+  (setf it (make-instance 'text-frame)))
 
 (defvar *display* (frame :root))
