@@ -5,11 +5,15 @@
   (:export #:init-screen
            #:destroy-screen
 
+           #:display
            #:refresh
            #:retained-frame
            #:text-frame
            #:callback-frame
 
-           #:putchar
+           #:put-char
+           #:put-text
            #:add-text
+
+           #:read-key
    ))

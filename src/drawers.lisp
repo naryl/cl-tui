@@ -9,12 +9,17 @@
        (ensure-window ,frame-var)
        ,@body)))
 
-(defun/frame putchar canvas-frame (frame x y c)
+(defun/frame put-text canvas-frame (frame x y str)
+  (with-slots (window) frame
+    (cl-charms:mvwaddstr window y x str)))
+
+(defun/frame put-char canvas-frame (frame x y c)
   (with-slots (window) frame
     (cl-charms:mvwaddstr window y x (string c))))
 
 ;;; Text frame-specific
 
+;;; WRITE-LINE and APPEND-LINE should be the main interface
 (defun/frame add-text text-frame (frame new-text)
   (with-slots (text) frame
     (setf text (concatenate 'string text new-text))))

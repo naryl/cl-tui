@@ -63,6 +63,22 @@
               (list
                (error "Not implemented")))))
 
+(defun frame-size (&optional frame)
+  "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet."
+  (let ((window (if frame
+                    (slot-value (frame frame) 'window)
+                    cl-charms:*stdscr*)))
+    (when window
+      (list (cl-charms:getmaxy window)
+            (cl-charms:getmaxx window)))))
+
+(defun refresh (&optional (frame *display*))
+  (labels ((render-tree (frame)
+             (let ((frame (frame frame)))
+               (render frame)
+               (mapcar #'render-tree (slot-value frame 'children)))))
+    (render-tree frame)))
+
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
   (:method :before (frame)
@@ -72,7 +88,14 @@
 
 (defun ensure-window (frame)
   (sunless (slot-value frame 'window)
-    (setf it (cl-charms:newwin 10 10 10 10))))
+    (setf it (cl-charms:newwin 25 25 0 0))))
+
+(defun resize ()
+  "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
+  ;; TODO:
+  )
+
+;;;; FRAME TYPES
 
 ;;; Canvas frame superclass (for frames allowed to use simple drawing functions)
 
