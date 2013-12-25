@@ -5,7 +5,6 @@
  * [X] Frames implemented with ncurses windows
  * [X] Display frame on screen
  * [X] Redraw on window size change
- * [ ] Delayed frame creation (i.e. when init-screen is called after define-frame)
  * [ ] Frame hierarchy and relative placement
  * [ ] Windows with borders
 * [o] Diffrent frame types
