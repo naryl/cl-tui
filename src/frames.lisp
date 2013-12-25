@@ -4,7 +4,7 @@
 ;;; Common stuff
 
 (defclass frame ()
-  ((parent :type (or frame boolean)
+  ((parent :type (or frame null)
            :initarg :frame
            :initform nil)
    (children :type list
@@ -73,19 +73,28 @@
             (cl-charms:getmaxx window)))))
 
 (defun refresh (&optional (frame *display*))
-  (labels ((render-tree (frame)
-             (let ((frame (frame frame)))
+  (labels ((is-frame-displayed (frame)
+             (cond ((eq frame *display*)
+                    t)
+                   ((eq frame nil)
+                    nil)
+                   (t
+                    (is-frame-displayed (slot-value frame 'parent)))))
+           (render-tree (frame-name)
+             (let ((frame (frame frame-name)))
                (render frame)
+               (cl-charms:wnoutrefresh (slot-value frame 'window))
                (mapcar #'render-tree (slot-value frame 'children)))))
-    (render-tree frame)
-    (cl-charms:doupdate)))
+    (cond ((is-frame-displayed frame)
+           (render-tree frame)
+           (cl-charms:doupdate))
+          (t (cerror "Attempt to refresh a frame ~S
+which is not a child of current root ~S" frame *display*)))))
 
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
   (:method :before (frame)
-    (ensure-window frame))
-  (:method :after (frame)
-    (cl-charms:wnoutrefresh (slot-value frame 'window))))
+    (ensure-window frame)))
 
 (defun ensure-window (frame)
   (sunless (slot-value frame 'window)

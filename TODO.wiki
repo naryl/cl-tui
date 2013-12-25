@@ -26,4 +26,4 @@
  * [ ] Used by retained frame and callback frame
  * [ ] Cell buffer manipulation functions
 * [ ] Input handling
-* [ ] Don't REFRESH frames which are currently not displayed.
+* [X] Don't REFRESH frames which are currently not displayed.
