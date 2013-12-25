@@ -6,7 +6,7 @@
 (defvar *size* nil)
 
 (defun init-screen ()
-  "Initializes the ncurses environment and starts the main-loop. Consumes the thread."
+  "Initializes the ncurses environment"
   (when *running*
     (error "Screen is already initialized"))
   (setf *running* t)
@@ -21,13 +21,14 @@
   nil)
 
 (defun destroy-screen ()
+  "Return terminal to default mode"
   (unless *running*
     (error "Screen is not initialized"))
   (cl-charms:endwin)
   (setf *running* nil)
   nil)
 
-(defun refresh (&optional (frame :root))
+(defun refresh (&optional (frame *display*))
   (labels ((render-tree (frame)
              (let ((frame (frame frame)))
                (render frame)
@@ -38,4 +39,19 @@
 (sunless (frame :root)
   (setf it (make-instance 'retained-frame)))
 
-(defvar *display* (frame :root))
+(defvar *display* :root)
+
+(defun display (&optional (frame :root))
+  "Set the root frame. Only it and its children will be displayed.
+  Default is :ROOT frame."
+  (setf *display* frame)
+  (resize))
+
+(defun resize ()
+  (ensure-window-sizes)
+  (refresh))
+
+(defun ensure-window-sizes ()
+  "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
+  ;; TODO:
+  nil)

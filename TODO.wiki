@@ -1,10 +1,10 @@
 * [X] Init/destroy
-* [o] Frame definition with callbacks to redraw
+* [O] Frame definition with callbacks to redraw
  * [X] One frame
  * [X] Redraw windows on request
  * [X] Frames implemented with ncurses windows
  * [X] Display frame on screen
- * [ ] Redraw on window size change
+ * [X] Redraw on window size change
  * [ ] Frame hierarchy and relative placement
  * [ ] Windows with borders
 * [o] Diffrent frame types

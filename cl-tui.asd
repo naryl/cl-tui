@@ -5,6 +5,7 @@
     :components ((:file "packages")
                  (:file "frames")
                  (:file "drawers")
-                 (:file "cl-tui"))
+                 (:file "cl-tui")
+                 (:file "input"))
     :depends-on (cl-charms
                  anaphora))
