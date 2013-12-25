@@ -77,14 +77,15 @@
              (let ((frame (frame frame)))
                (render frame)
                (mapcar #'render-tree (slot-value frame 'children)))))
-    (render-tree frame)))
+    (render-tree frame)
+    (cl-charms:doupdate)))
 
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
   (:method :before (frame)
     (ensure-window frame))
   (:method :after (frame)
-    (cl-charms:wrefresh (slot-value frame 'window))))
+    (cl-charms:wnoutrefresh (slot-value frame 'window))))
 
 (defun ensure-window (frame)
   (sunless (slot-value frame 'window)

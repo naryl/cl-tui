@@ -9,7 +9,7 @@
        (ensure-window ,frame-var)
        ,@body)))
 
-(defun/frame put-text canvas-frame (frame x y str)
+(defun/frame put-text canvas-frame (frame y x str)
   (with-slots (window) frame
     (cl-charms:mvwaddstr window y x str)))
 
