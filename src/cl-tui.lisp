@@ -14,6 +14,7 @@
   (cl-charms:keypad cl-charms:*stdscr* 1)
   (cl-charms:noecho)
   (cl-charms:curs-set 0)
+  (cl-charms:refresh)
   (resize)
   nil)
 

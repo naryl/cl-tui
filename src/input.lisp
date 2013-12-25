@@ -20,7 +20,7 @@
 (defun read-key ()
   ;; Using SETF instead of LET because sigwinch handler doesn't see the dynamic binding
   (setf *in-getch* t)
-  (let ((key (cl-charms:wgetch (slot-value (frame *display*) 'window))))
+  (let ((key (cl-charms:getch)))
     (setf *in-getch* nil)
     (cond ((eql key cl-charms:key_resize)
            (resize)
