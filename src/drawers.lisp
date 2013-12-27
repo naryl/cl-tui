@@ -24,5 +24,7 @@
   (with-slots (text) frame
     (setf text (concatenate 'string text new-text))))
 
-(defun/frame clear text-frame (frame)
-  (setf (slot-value frame 'text) ""))
+(defun/frame clear frame (frame)
+  (etypecase frame
+    (text-frame (setf (slot-value frame 'text) ""))
+    (canvas-frame (cl-charms:wclear (slot-value frame 'window)))))

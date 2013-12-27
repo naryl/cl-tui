@@ -14,6 +14,7 @@
            #:put-char
            #:put-text
            #:add-text
+           #:clear
 
            #:read-key
    ))

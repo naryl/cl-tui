@@ -83,8 +83,9 @@
            (render-tree (frame-name)
              (let ((frame (frame frame-name)))
                (render frame)
-               (cl-charms:wnoutrefresh (slot-value frame 'window))
-               (mapcar #'render-tree (slot-value frame 'children)))))
+               (with-slots (window children) frame
+                 (cl-charms:wnoutrefresh window)
+                 (mapcar #'render-tree children)))))
     (cond ((is-frame-displayed frame)
            (render-tree frame)
            (cl-charms:doupdate))
@@ -94,7 +95,11 @@ which is not a child of current root ~S" frame *display*)))))
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
   (:method :before (frame)
-    (ensure-window frame)))
+    (ensure-window frame)
+    (with-slots (window border) frame
+      (when border
+        (apply #'cl-charms:box window
+               (mapcar #'char-code (list #\| #\-)))))))
 
 (defun ensure-window (frame)
   (sunless (slot-value frame 'window)
@@ -126,8 +131,9 @@ which is not a child of current root ~S" frame *display*)))))
            :initarg :render)))
 
 (defmethod render ((frame callback-frame))
-  (cl-charms:clear)
-  (funcall (slot-value frame 'render)))
+  (with-slots (render window) frame
+    (cl-charms:wclear window)
+    (funcall render)))
 
 ;;; Text frame
 
