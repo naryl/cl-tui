@@ -8,4 +8,5 @@
                  (:file "cl-tui")
                  (:file "input"))
     :depends-on (cl-charms
+                 alexandria
                  anaphora))

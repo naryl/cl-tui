@@ -95,19 +95,33 @@ which is not a child of current root ~S" frame *display*)))))
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
   (:method :before (frame)
-    (ensure-window frame)
     (with-slots (window border) frame
       (when border
         (apply #'cl-charms:box window
                (mapcar #'char-code (list #\| #\-)))))))
 
-(defun ensure-window (frame)
-  (sunless (slot-value frame 'window)
-    (setf it (cl-charms:newwin 25 25 0 0))))
+(defun subwindow-p (window)
+  (= -1 (cl-charms:getparx window)))
 
 (defun resize ()
   "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
-  ;; TODO:
+  (labels ((delete-windows (frame)
+             (with-slots (children window) frame
+               (mapcar #'delete-windows children)
+               (cl-charms:delwin window)
+               (setf window nil))))
+    (with-slots (window) *display*
+      (when window
+        (cond ((subwindow-p window)
+               (delete-windows window))
+              (t (cl-charms:mvwin window 0 0)
+                 (cl-charms:wresize window 0 0))))
+      (unless window
+        (setf window (cl-charms:newwin 0 0 0 0)))
+      (place-children *display*))))
+
+(defun place-children (frame)
+  ;; TODO: Window placement
   )
 
 ;;;; FRAME TYPES
@@ -144,4 +158,6 @@ which is not a child of current root ~S" frame *display*)))))
 (defmethod render ((frame text-frame))
   (with-slots (window text) frame
     (cl-charms:wclear window)
-    (cl-charms:waddstr window text)))
+    (loop :for i :from 0
+       :for line :in text
+       :do (cl-charms:mvwaddstr window i 0 text))))

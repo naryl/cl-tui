@@ -6,7 +6,7 @@
  * [X] Display frame on screen
  * [X] Redraw on window size change
  * [ ] Frame hierarchy and relative placement
- * [ ] Windows with borders
+ * [X] Windows with borders
 * [o] Diffrent frame types
  * [X] Frame that remembers what was drawn on it (like ncurses default)
  * [o] Frame rendering on callback
@@ -20,6 +20,7 @@
   * [ ] Auto line wrap
   * [ ] Scrolling text
   * [ ] Justified mode
+  * [ ] Merging equal lines
 * [ ] Drawing functions
  * [ ] Used for drawing text
  * [ ] Colors
@@ -27,3 +28,4 @@
  * [ ] Cell buffer manipulation functions
 * [ ] Input handling
 * [X] Don't REFRESH frames which are currently not displayed.
+* [ ] Optionally display debugger with restarts in a special frame

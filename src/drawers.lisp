@@ -6,7 +6,6 @@
     `(defun ,name ,args
        (setf ,frame-var (frame ,frame-var))
        (check-type ,frame-var ,type)
-       (ensure-window ,frame-var)
        ,@body)))
 
 (defun/frame put-text canvas-frame (frame y x str)
@@ -19,12 +18,17 @@
 
 ;;; Text frame-specific
 
-;;; WRITE-LINE and APPEND-LINE should be the main interface
-(defun/frame add-text text-frame (frame new-text)
+(defun/frame append-line text-frame (frame new-line)
   (with-slots (text) frame
-    (setf text (concatenate 'string text new-text))))
+    (setf text (append text (list new-line)))))
+
+(defun/frame append-text text-frame (frame new-text)
+  (with-slots (text) frame
+    (let ((last-line (lastcar text)))
+      (setf (lastcar text)
+            (concatenate 'string last-line new-text)))))
 
 (defun/frame clear frame (frame)
   (etypecase frame
-    (text-frame (setf (slot-value frame 'text) ""))
+    (text-frame (setf (slot-value frame 'text) nil))
     (canvas-frame (cl-charms:wclear (slot-value frame 'window)))))

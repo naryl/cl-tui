@@ -1,20 +1,27 @@
 
 (defpackage cl-tui
   (:use :cl
+        :alexandria
         :anaphora)
   (:export #:init-screen
            #:destroy-screen
 
+           ; Updates
            #:display
            #:refresh
-           #:retained-frame
-           #:text-frame
-           #:callback-frame
 
+           ; Canvas frames
+           #:retained-frame
+           #:callback-frame
            #:put-char
            #:put-text
-           #:add-text
+
+           ; Text frame
+           #:text-frame
+           #:append-line
+           #:append-text
            #:clear
 
+           ; Input
            #:read-key
    ))
