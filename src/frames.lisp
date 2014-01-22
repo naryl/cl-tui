@@ -7,28 +7,10 @@
   ((parent :type (or frame null)
            :initarg :frame
            :initform nil)
-   (children :type list
+   (children :type layout
              :initform nil)
    (window :initform nil
-           :documentation "Ncurses window object. Created on demand.")
-   (max-w :type fixnum
-          :initarg :max-w
-          :initform 100500)
-   (min-w :type fixnum
-          :initarg :min-w
-          :initform 0)
-   (max-h :type fixnum
-          :initarg :max-h
-          :initform 100500)
-   (min-h :type fixnum
-          :initarg :min-h
-          :initform 0)
-   (weight :type fixnum
-           :initarg :weight
-           :initform 1)
-   (border :type boolean
-           :initarg :border
-           :initform nil)))
+           :documentation "Ncurses window object. Created on demand.")))
 
 (defun frame (name)
   (get name 'frame))
@@ -64,7 +46,8 @@
                (error "Not implemented")))))
 
 (defun frame-size (&optional frame)
-  "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet."
+  "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet.
+Default FRAME is the whole screen."
   (let ((window (if frame
                     (slot-value (frame frame) 'window)
                     cl-charms:*stdscr*)))
@@ -110,15 +93,16 @@ which is not a child of current root ~S" frame *display*)))))
                (mapcar #'delete-windows children)
                (cl-charms:delwin window)
                (setf window nil))))
-    (with-slots (window) *display*
-      (when window
-        (cond ((subwindow-p window)
-               (delete-windows window))
-              (t (cl-charms:mvwin window 0 0)
-                 (cl-charms:wresize window 0 0))))
-      (unless window
-        (setf window (cl-charms:newwin 0 0 0 0)))
-      (place-children *display*))))
+    (let+ (((h w) (frame-size)))
+      (with-slots (window layout) (frame *display*)
+        (apply #'recalculate-layout layout (frame-size))
+        (when window
+          (cond ((subwindow-p window)
+                 (delete-windows window))
+                (t (cl-charms:mvwin window 0 0)
+                   (cl-charms:wresize window h w))))
+        (unless window
+          (setf window (cl-charms:newwin h w 0 0)))))))
 
 (defun place-children (frame)
   ;; TODO: Window placement

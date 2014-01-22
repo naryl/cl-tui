@@ -3,10 +3,13 @@
     :pathname "src/"
     :serial t
     :components ((:file "packages")
+                 (:file "layout")
                  (:file "frames")
                  (:file "drawers")
                  (:file "cl-tui")
-                 (:file "input"))
+                 (:file "input")
+                 )
     :depends-on (cl-charms
+                 let+
                  alexandria
                  anaphora))

@@ -6,26 +6,32 @@
  * [X] Display frame on screen
  * [X] Redraw on window size change
  * [ ] Frame hierarchy and relative placement
+  * [ ] Single cell
+  * [ ] One-dimension
+  * [ ] Two-dimension
+  * [ ] Tabbed layout (?)
  * [X] Windows with borders
 * [o] Diffrent frame types
  * [X] Frame that remembers what was drawn on it (like ncurses default)
  * [o] Frame rendering on callback
-  * [X] Frame
+  * [X] Frame class
   * [ ] Configurable clear color
  * [ ] Frame rendering a cell buffer
-  * [ ] Frame itself
+  * [ ] Frame class
   * [ ] ncurses pad-like functionality
  * [.] Frame rendering text
-  * [X] Frame itself
+  * [X] Frame class
   * [ ] Auto line wrap
   * [ ] Scrolling text
   * [ ] Justified mode
   * [ ] Merging equal lines
+  * [ ] Configurable (lambda?) timestamps
 * [ ] Drawing functions
  * [ ] Used for drawing text
  * [ ] Colors
  * [ ] Used by retained frame and callback frame
  * [ ] Cell buffer manipulation functions
 * [ ] Input handling
+ * [ ] What exactly?
 * [X] Don't REFRESH frames which are currently not displayed.
 * [ ] Optionally display debugger with restarts in a special frame
