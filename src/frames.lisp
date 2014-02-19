@@ -5,15 +5,16 @@
 
 (defclass frame ()
   ((parent :type (or frame null)
-           :initarg :frame
+           :initarg :parent
            :initform nil)
-   (children :type layout
+   (children :type (or null layout)
              :initform nil)
    (window :initform nil
            :documentation "Ncurses window object. Created on demand.")))
 
 (defun frame (name)
-  (get name 'frame))
+  (when name
+    (get name 'frame)))
 
 (defsetf frame (name) (value)
   `(setf (get ,name 'frame) ,value))
@@ -26,24 +27,20 @@
   (let ((directions (- 4 (count nil (list left-of right-of up-of down-of)))))
     (unless (<= directions 1)
       (error "More than one direction specified")))
-  (setf parent
-        (case parent
-          ((t) (frame :root))
-          ((nil) nil)
-          (t (frame parent))))
+  (when (eq parent t)
+    (setf parent :root))
   `(progn (setf (frame ',name)
                 (make-instance ',type ,@frame-args
-                               :parent ,parent
-                               :max-w ,max-w
-                               :min-w ,min-w
-                               :max-h ,max-h
-                               :min-h ,min-h
-                               :weight ,weight
-                               :border ,border))
+                               :parent (frame ',parent)))
           ,@(when parent
-              ;; TODO: frame placement here
-              (list
-               (error "Not implemented")))))
+                  (list `(add-child (frame ',parent) (frame ',name))))
+          ',name))
+
+(defun add-child (parent child)
+  (with-slots (children) parent
+    (unless children
+      (setf children (make-layout)))
+    (layout-insert (slot-value parent 'children) child)))
 
 (defun frame-size (&optional frame)
   "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet.
@@ -94,8 +91,9 @@ which is not a child of current root ~S" frame *display*)))))
                (cl-charms:delwin window)
                (setf window nil))))
     (let+ (((h w) (frame-size)))
-      (with-slots (window layout) (frame *display*)
-        (apply #'recalculate-layout layout (frame-size))
+      (with-slots (window children) (frame *display*)
+        (when children
+          (apply #'recalculate-layout children (frame-size)))
         (when window
           (cond ((subwindow-p window)
                  (delete-windows window))
@@ -103,10 +101,6 @@ which is not a child of current root ~S" frame *display*)))))
                    (cl-charms:wresize window h w))))
         (unless window
           (setf window (cl-charms:newwin h w 0 0)))))))
-
-(defun place-children (frame)
-  ;; TODO: Window placement
-  )
 
 ;;;; FRAME TYPES
 

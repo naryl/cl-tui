@@ -9,7 +9,9 @@ Each element is a struct containing list/frame and layouting data (min-size, max
 |#
 
 (defstruct layout
-  rows cols cells)
+  (rows nil)
+  (cols nil)
+  (cells nil))
 
 (defstruct layout-row
   (min-size 0)
@@ -24,9 +26,6 @@ Each element is a struct containing list/frame and layouting data (min-size, max
   (size 0))
 
 (defstruct layout-cell
-  (min-size 0)
-  (max-size 100500)
-  (weight 1)
   frame left right top bottom)
 
 (defmacro do-cells ((frame left right top bottom) layout &body body)
@@ -52,8 +51,10 @@ Each element is a struct containing list/frame and layouting data (min-size, max
 
 (defun recalculate-layout (layout width height)
   "Recalculate rows and cols min- and max-size and weight. Then their size."
-  (setf (layout-col-size (first (layout-cols layout))) width
-        (layout-row-size (first (layout-rows layout))) height))
+  (when (and (layout-cols layout)
+             (layout-rows layout))
+    (setf (layout-col-size (first (layout-cols layout))) width
+          (layout-row-size (first (layout-rows layout))) height)))
 
 #|
 (defun pack (frame place anchor &key (min-size 0) (max-size 100500) (weight 1))
