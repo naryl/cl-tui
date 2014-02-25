@@ -14,7 +14,9 @@
                          (lambda (a b c)
                            (declare (ignore a b c))
                            (if *in-getch*
-                               (resize)
+                               (progn
+                                 (resize)
+                                 (refresh))
                                (cl-charms:ungetch cl-charms:key_resize))))
 
 (defun read-key ()
@@ -24,5 +26,6 @@
     (setf *in-getch* nil)
     (cond ((eql key cl-charms:key_resize)
            (resize)
+           (refresh)
            (read-key))
           (t key))))

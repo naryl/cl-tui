@@ -96,18 +96,13 @@ which is not a child of current root ~S" frame *display*)))
 
 (defun resize ()
   "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
-  (labels ((delete-windows (window)
-             (cl-charms:delwin window)
-             (setf window nil)))
-    (let+ (((h w) (frame-size)))
-      (with-slots (window children) (frame *display*)
-        (when children
-          (apply #'recalculate-layout children (frame-size)))
-        (when window
-          (cond ((subwindow-p window)
-                 (delete-windows window))
-                (t (cl-charms:mvwin window 0 0)
-                   (cl-charms:wresize window h w))))))))
+  (let+ (((h w) (frame-size)))
+    (with-slots (window children) (frame *display*)
+      (when children
+        (apply #'recalculate-layout children (frame-size)))
+      (when window
+        (cl-charms:mvwin window 0 0)
+        (cl-charms:wresize window h w)))))
 
 ;;;; FRAME TYPES
 
