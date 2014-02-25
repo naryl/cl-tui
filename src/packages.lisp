@@ -7,6 +7,10 @@
   (:export #:init-screen
            #:destroy-screen
 
+           ; Other stuff
+           #:frame-size
+           #:define-frame
+
            ; Updates
            #:display
            #:refresh

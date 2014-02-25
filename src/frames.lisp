@@ -122,12 +122,14 @@ which is not a child of current root ~S" frame *display*)))
 
 (defclass callback-frame (canvas-frame)
   ((render :type function
+           :initform nil
            :initarg :render)))
 
 (defmethod render ((frame callback-frame))
   (with-slots (render window) frame
     (cl-charms:wclear window)
-    (funcall render)))
+    (when render
+      (funcall render))))
 
 ;;; Text frame
 

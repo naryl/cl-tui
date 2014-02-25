@@ -8,6 +8,7 @@
  * [o] Frame hierarchy and relative placement
   * [X] Single cell
   * [X] Properly redefining frames
+  * [ ] Proper hierarchy resizing
   * [ ] One-dimension
   * [ ] Two-dimension
   * [ ] Tabbed layout (?)
