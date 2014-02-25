@@ -28,13 +28,11 @@
       (error "More than one direction specified")))
   (when (eq parent t)
     (setf parent :root))
-  `(progn (awhen (frame ',name)
-            (remove-child (slot-value it 'parent) it))
-     (setf (frame ',name)
+  `(progn (setf (frame ',name)
                 (make-instance ',type ,@frame-args
                                :parent (frame ',parent)))
           ,@(when parent
-                  (list `(add-child (frame ',parent) (frame ',name))))
+                  (list `(add-child (frame ',parent) ',name)))
           ',name))
 
 (defun add-child (parent child)
@@ -42,7 +40,7 @@
     (unless children
       (setf children (make-layout)))
     (layout-insert children child)
-    (setf (slot-value child 'parent) parent)))
+    (setf (slot-value (frame child) 'parent) parent)))
 
 (defun remove-child (parent child)
   (with-slots (children) parent
@@ -72,7 +70,9 @@ Default FRAME is the whole screen."
                (cl-charms:wnoutrefresh window)
                (when children
                  (mapcar #'render-tree
-                         (mapcar #'layout-cell-frame (layout-cells children)))))))
+                         (mapcar #'frame
+                                 (mapcar #'layout-cell-frame
+                                         (layout-cells children))))))))
     (cond ((is-frame-displayed frame)
            (render-tree (frame frame))
            (cl-charms:doupdate))
@@ -81,20 +81,15 @@ which is not a child of current root ~S" frame *display*)))
     nil))
 
 (defgeneric render (frame)
-  (:documentation "Displays the frame on screen")
+  (:documentation "Displays the frame on screen. FRAME is the object here. Not the name")
   (:method :before (frame)
-     (with-slots (window)
-         frame
-       (unless window
-         ;; Windows should be created on resize
-         ;; We don't actually know the required sizes here
-         (let+ (((h w) (frame-size)))
-           (setf (slot-value frame 'window) (cl-charms:newwin h w 0 0)))))
-    (when nil
-      (with-slots (window border) frame
-        (when border
-          (apply #'cl-charms:box window
-                 (mapcar #'char-code (list #\| #\-))))))))
+    (with-slots (window)
+        frame
+      (unless window
+        ;; Windows should be created on resize
+        ;; We don't actually know the required sizes here
+        (let+ (((h w) (frame-size)))
+          (setf (slot-value frame 'window) (cl-charms:newwin h w 0 0)))))))
 
 (defun subwindow-p (window)
   (= -1 (cl-charms:getparx window)))

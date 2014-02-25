@@ -39,8 +39,8 @@ Each element is a struct containing list/frame and layouting data (min-size, max
                (,bottom (layout-cell-bottom ,cell)))
            ,@body)))))
 
-(defun layout-insert (layout frame)
-  (let ((cell (make-layout-cell :frame frame
+(defun layout-insert (layout frame-name)
+  (let ((cell (make-layout-cell :frame frame-name
                                 :left 0
                                 :right 0
                                 :top 0
