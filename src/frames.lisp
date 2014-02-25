@@ -23,7 +23,7 @@
                        &key ((:on parent) nil)
                          left-of right-of up-of down-of
                          max-w min-w max-h min-h weight
-                         border)
+                         )
   (let ((directions (- 4 (count nil (list left-of right-of up-of down-of)))))
     (unless (<= directions 1)
       (error "More than one direction specified")))
@@ -40,7 +40,8 @@
   (with-slots (children) parent
     (unless children
       (setf children (make-layout)))
-    (layout-insert (slot-value parent 'children) child)))
+    (layout-insert (slot-value parent 'children) child)
+    (setf (slot-value child 'parent) parent)))
 
 (defun frame-size (&optional frame)
   "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet.
@@ -59,15 +60,16 @@ Default FRAME is the whole screen."
                    ((eq frame nil)
                     nil)
                    (t
-                    (is-frame-displayed (slot-value frame 'parent)))))
-           (render-tree (frame-name)
-             (let ((frame (frame frame-name)))
-               (render frame)
-               (with-slots (window children) frame
-                 (cl-charms:wnoutrefresh window)
-                 (mapcar #'render-tree children)))))
+                    (is-frame-displayed (slot-value (frame frame) 'parent)))))
+           (render-tree (frame)
+             (render frame)
+             (with-slots (window children) frame
+               (cl-charms:wnoutrefresh window)
+               (when children
+                 (mapcar #'render-tree
+                         (mapcar #'layout-cell-frame (layout-cells children)))))))
     (cond ((is-frame-displayed frame)
-           (render-tree frame)
+           (render-tree (frame frame))
            (cl-charms:doupdate))
           (t (cerror "Attempt to refresh a frame ~S
 which is not a child of current root ~S" frame *display*)))))
@@ -75,21 +77,27 @@ which is not a child of current root ~S" frame *display*)))))
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
   (:method :before (frame)
-    (with-slots (window border) frame
-      (when border
-        (apply #'cl-charms:box window
-               (mapcar #'char-code (list #\| #\-)))))))
+     (with-slots (window)
+         frame
+       (unless window
+         ;; Windows should be created on resize
+         ;; We don't actually know the required sizes here
+         (let+ (((h w) (frame-size)))
+           (setf (slot-value frame 'window) (cl-charms:newwin h w 0 0)))))
+    (when nil
+      (with-slots (window border) frame
+        (when border
+          (apply #'cl-charms:box window
+                 (mapcar #'char-code (list #\| #\-))))))))
 
 (defun subwindow-p (window)
   (= -1 (cl-charms:getparx window)))
 
 (defun resize ()
   "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
-  (labels ((delete-windows (frame)
-             (with-slots (children window) frame
-               (mapcar #'delete-windows children)
-               (cl-charms:delwin window)
-               (setf window nil))))
+  (labels ((delete-windows (window)
+             (cl-charms:delwin window)
+             (setf window nil)))
     (let+ (((h w) (frame-size)))
       (with-slots (window children) (frame *display*)
         (when children
@@ -98,9 +106,7 @@ which is not a child of current root ~S" frame *display*)))))
           (cond ((subwindow-p window)
                  (delete-windows window))
                 (t (cl-charms:mvwin window 0 0)
-                   (cl-charms:wresize window h w))))
-        (unless window
-          (setf window (cl-charms:newwin h w 0 0)))))))
+                   (cl-charms:wresize window h w))))))))
 
 ;;;; FRAME TYPES
 
