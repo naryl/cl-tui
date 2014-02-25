@@ -49,6 +49,11 @@ Each element is a struct containing list/frame and layouting data (min-size, max
           (layout-cols layout) (list (make-layout-col))
           (layout-cells layout) (list cell))))
 
+(defun layout-remove (layout frame)
+  (setf (layout-rows layout) nil
+        (layout-cols layout) nil
+        (layout-cells layout) nil))
+
 (defun recalculate-layout (layout width height)
   "Recalculate rows and cols min- and max-size and weight. Then their size."
   (when (and (layout-cols layout)

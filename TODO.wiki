@@ -5,8 +5,9 @@
  * [X] Frames implemented with ncurses windows
  * [X] Display frame on screen
  * [X] Redraw on window size change
- * [ ] Frame hierarchy and relative placement
-  * [ ] Single cell
+ * [o] Frame hierarchy and relative placement
+  * [X] Single cell
+  * [X] Properly redefining frames
   * [ ] One-dimension
   * [ ] Two-dimension
   * [ ] Tabbed layout (?)

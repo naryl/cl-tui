@@ -22,14 +22,15 @@
 (defmacro define-frame (name (type &rest frame-args)
                        &key ((:on parent) nil)
                          left-of right-of up-of down-of
-                         max-w min-w max-h min-h weight
-                         )
+                         max-w min-w max-h min-h weight)
   (let ((directions (- 4 (count nil (list left-of right-of up-of down-of)))))
     (unless (<= directions 1)
       (error "More than one direction specified")))
   (when (eq parent t)
     (setf parent :root))
-  `(progn (setf (frame ',name)
+  `(progn (awhen (frame ',name)
+            (remove-child (slot-value it 'parent) it))
+     (setf (frame ',name)
                 (make-instance ',type ,@frame-args
                                :parent (frame ',parent)))
           ,@(when parent
@@ -40,8 +41,12 @@
   (with-slots (children) parent
     (unless children
       (setf children (make-layout)))
-    (layout-insert (slot-value parent 'children) child)
+    (layout-insert children child)
     (setf (slot-value child 'parent) parent)))
+
+(defun remove-child (parent child)
+  (with-slots (children) parent
+    (layout-remove children child)))
 
 (defun frame-size (&optional frame)
   "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet.
@@ -72,7 +77,8 @@ Default FRAME is the whole screen."
            (render-tree (frame frame))
            (cl-charms:doupdate))
           (t (cerror "Attempt to refresh a frame ~S
-which is not a child of current root ~S" frame *display*)))))
+which is not a child of current root ~S" frame *display*)))
+    nil))
 
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen")
