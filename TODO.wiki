@@ -13,6 +13,8 @@
   * [ ] Two-dimension
   * [ ] Tabbed layout (?)
  * [X] Windows with borders
+* [ ] Examples
+  * [ ] Example for multiple "scenes" and (DISPLAY 'non-root)
 * [o] Diffrent frame types
  * [X] Frame that remembers what was drawn on it (like ncurses default)
  * [o] Frame rendering on callback
