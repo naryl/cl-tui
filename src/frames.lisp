@@ -36,6 +36,18 @@
           ',name
           (when *running* (resize))))
 
+(defun destroy-frame (name)
+  (awhen (frame name)
+    (with-slots (window children parent) it
+      (when children
+        (mapc #'destroy-frame (layout-frames children)))
+      (when window
+        (cl-charms:delwin window))
+      (when parent
+        (layout-remove (slot-value parent 'children) name))
+      (remprop name 'frame)
+      t)))
+
 (defun add-child (parent child)
   (with-slots (children) parent
     (unless children
