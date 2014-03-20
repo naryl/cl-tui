@@ -33,7 +33,8 @@
                                :parent (frame ',parent)))
           ,@(when parent
                   (list `(add-child (frame ',parent) ',name)))
-          ',name))
+          ',name
+          (when *running* (resize))))
 
 (defun add-child (parent child)
   (with-slots (children) parent
@@ -83,13 +84,7 @@ which is not a child of current root ~S" frame *display*)))
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen. FRAME is the object here. Not the name")
   (:method :before (frame)
-    (with-slots (window)
-        frame
-      (unless window
-        ;; Windows should be created on resize
-        ;; We don't actually know the required sizes here
-        (let+ (((h w) (frame-size)))
-          (setf (slot-value frame 'window) (cl-charms:newwin h w 0 0)))))))
+    nil))
 
 (defun subwindow-p (window)
   (= -1 (cl-charms:getparx window)))
@@ -100,9 +95,16 @@ which is not a child of current root ~S" frame *display*)))
     (with-slots (window children) (frame *display*)
       (when children
         (apply #'recalculate-layout children (frame-size)))
-      (when window
-        (cl-charms:mvwin window 0 0)
-        (cl-charms:wresize window h w)))))
+      (ensure-window *display* h w 0 0)
+      )))
+
+(defun ensure-window (frame h w x y)
+  (with-slots (window) (frame frame)
+    (cond (window
+           (cl-charms:mvwin window y x)
+           (cl-charms:wresize window h w))
+          (t
+           (setf window (cl-charms:newwin h w y x))))))
 
 ;;;; FRAME TYPES
 

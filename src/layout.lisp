@@ -59,7 +59,9 @@ Each element is a struct containing list/frame and layouting data (min-size, max
   (when (and (layout-cols layout)
              (layout-rows layout))
     (setf (layout-col-size (first (layout-cols layout))) width
-          (layout-row-size (first (layout-rows layout))) height)))
+          (layout-row-size (first (layout-rows layout))) height)
+    (let ((cell (first (layout-cells layout))))
+      (ensure-window (layout-cell-frame cell) width height 0 0))))
 
 #|
 (defun pack (frame place anchor &key (min-size 0) (max-size 100500) (weight 1))
