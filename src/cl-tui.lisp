@@ -3,16 +3,25 @@
 
 (defvar *running* nil "T when screen is initialized")
 
-(defun init-screen ()
+(defun init-screen (&rest arguments)
   "Initializes the ncurses environment"
   (when *running*
     (error "Screen is already initialized"))
   (setf *running* t)
   (cl-charms:initscr)
+  (let ((arguments (or arguments '(:raw :noecho))))
+    (dolist (argument arguments)
+      (case argument
+        (:echo (cl-charms:echo))
+        (:noecho (cl-charms:noecho))
+        (:raw (cl-charms:raw))
+        (:noraw (cl-charms:noraw))
+        (:cbreak (cl-charms:cbreak))
+        (:nocbreak (cl-charms:nocbreak))
+        (:cursor (cl-charms:curs-set 1))
+        (:nocursor (cl-charms:curs-set 0)))))
   (cl-charms:clear)
-  (cl-charms:raw)
   (cl-charms:keypad cl-charms:*stdscr* 1)
-  (cl-charms:noecho)
   (cl-charms:curs-set 0)
   (cl-charms:refresh)
   (resize)
@@ -38,3 +47,43 @@
   (setf *display* frame)
   (resize)
   (refresh))
+
+(defmacro with-screen ((&body arguments) &body body)
+  "Ensures that wrapped code will be executed after successful
+initialization of screen and that screen will be properly
+deinitialized after `body' is executed (or reaised error)."
+  `(unwind-protect
+        (progn (init-screen ,@arguments)
+               ,@body)
+     (destroy-screen)))
+
+(defun get-attribute-name-from-keyword (attribute)
+  "Converts keyword to ncurses attribute."
+  (if (not (keywordp attribute))
+    attribute
+    (case attribute
+      (:normal cl-charms:a_normal)
+      (:standout cl-charms:a_standout)
+      (:underline cl-charms:a_underline)
+      (:reverse cl-charms:a_reverse)
+      (:blink cl-charms:a_blink)
+      (:dim cl-charms:a_dim)
+      (:bold cl-charms:a_bold)
+      (:protect cl-charms:a_protect)
+      (:invis cl-charms:a_invis)
+      (:altcharset cl-charms:a_altcharset))))
+
+(defmacro with-attributes ((&body attributes) &body body)
+  "Enables given attributes, executes body and then ensures
+they're disabled."
+  `(unwind-protect
+        (progn
+          (attron ,(apply #'logior
+                          (loop
+                            for attribute in attributes
+                            collecting (get-attribute-name-from-keyword attribute))))
+          ,@body)
+     (attroff ,(apply #'logior
+                      (loop
+                        for attribute in attributes
+                        collecting (get-attribute-name-from-keyword attribute))))))
