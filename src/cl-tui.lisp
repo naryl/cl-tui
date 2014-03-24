@@ -76,14 +76,10 @@ deinitialized after `body' is executed (or reaised error)."
 (defmacro with-attributes ((&body attributes) &body body)
   "Enables given attributes, executes body and then ensures
 they're disabled."
-  `(unwind-protect
-        (progn
-          (attron ,(apply #'logior
-                          (loop
-                            for attribute in attributes
-                            collecting (get-attribute-name-from-keyword attribute))))
-          ,@body)
-     (attroff ,(apply #'logior
-                      (loop
-                        for attribute in attributes
-                        collecting (get-attribute-name-from-keyword attribute))))))
+  (let ((attribute-names (apply #'logior
+                                (mapcar #'get-attribute-name-from-keyword attributes))))
+    `(unwind-protect
+          (progn
+            (attron ,attribute-names)
+            ,@body)
+       (attroff ,attribute-names))))
