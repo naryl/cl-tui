@@ -10,6 +10,7 @@
            ; Other stuff
            #:frame-size
            #:define-frame
+           #:destroy-frame
 
            ; Updates
            #:display

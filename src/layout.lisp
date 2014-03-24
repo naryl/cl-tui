@@ -54,12 +54,20 @@ Each element is a struct containing list/frame and layouting data (min-size, max
         (layout-cols layout) nil
         (layout-cells layout) nil))
 
+(defun layout-frames (layout)
+  (mapc #'layout-cell-frame (layout-cells layout)))
+
 (defun recalculate-layout (layout width height)
   "Recalculate rows and cols min- and max-size and weight. Then their size."
   (when (and (layout-cols layout)
              (layout-rows layout))
     (setf (layout-col-size (first (layout-cols layout))) width
-          (layout-row-size (first (layout-rows layout))) height)))
+          (layout-row-size (first (layout-rows layout))) height)
+    (let* ((cell (first (layout-cells layout)))
+           (frame (layout-cell-frame cell)))
+      (ensure-window frame width height 0 0)
+      (awhen (slot-value (frame frame) 'children)
+        (recalculate-layout it width height)))))
 
 #|
 (defun pack (frame place anchor &key (min-size 0) (max-size 100500) (weight 1))
