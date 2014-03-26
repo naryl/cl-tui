@@ -19,7 +19,8 @@
         (:cbreak (cl-charms:cbreak))
         (:nocbreak (cl-charms:nocbreak))
         (:cursor (cl-charms:curs-set 1))
-        (:nocursor (cl-charms:curs-set 0)))))
+        (:nocursor (cl-charms:curs-set 0))
+        (:colors (init-color)))))
   (cl-charms:clear)
   (cl-charms:keypad cl-charms:*stdscr* 1)
   (cl-charms:curs-set 0)
@@ -34,6 +35,13 @@
   (cl-charms:endwin)
   (setf *running* nil)
   nil)
+
+(defun init-color ()
+  (cond ((= (cl-charms:has-colors) 1)
+         (cl-charms:start-color)
+         (init-color-pairs))
+        (t
+         (error "Your terminal doesn't support color"))))
 
 ;;; Root frame definition
 (sunless (frame :root)
@@ -56,30 +64,3 @@ deinitialized after `body' is executed (or reaised error)."
         (progn (init-screen ,@arguments)
                ,@body)
      (destroy-screen)))
-
-(defun get-attribute-name-from-keyword (attribute)
-  "Converts keyword to ncurses attribute."
-  (if (not (keywordp attribute))
-    attribute
-    (case attribute
-      (:normal cl-charms:a_normal)
-      (:standout cl-charms:a_standout)
-      (:underline cl-charms:a_underline)
-      (:reverse cl-charms:a_reverse)
-      (:blink cl-charms:a_blink)
-      (:dim cl-charms:a_dim)
-      (:bold cl-charms:a_bold)
-      (:protect cl-charms:a_protect)
-      (:invis cl-charms:a_invis)
-      (:altcharset cl-charms:a_altcharset))))
-
-(defmacro with-attributes ((&body attributes) &body body)
-  "Enables given attributes, executes body and then ensures
-they're disabled."
-  (let ((attribute-names (apply #'logior
-                                (mapcar #'get-attribute-name-from-keyword attributes))))
-    `(unwind-protect
-          (progn
-            (attron ,attribute-names)
-            ,@body)
-       (attroff ,attribute-names))))
