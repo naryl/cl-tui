@@ -37,7 +37,7 @@
 
 (defun get-attribute-name-from-keyword (attribute)
   "Converts keyword to ncurses attribute."
-  (cond ((keywordp attribute)
+  (cond ((keywordp attribute) ; Simple attribute
          (ecase attribute
            (:normal cl-charms:a_normal)
            (:standout cl-charms:a_standout)
@@ -49,56 +49,78 @@
            (:protect cl-charms:a_protect)
            (:invis cl-charms:a_invis)
            (:altcharset cl-charms:a_altcharset)))
-        ((and (listp attribute)
+        ((and (listp attribute) ; Color
               (eq (first attribute) :color)
-              (keywordp (second attribute)))
-         (aif (color-pair-by-name (second attribute))
-              (cl-charms:color-pair it)
-              (error "Unknown color ~S" (second attribute))))
+              (integerp (second attribute)))
+         (let ((color (second attribute)))
+           (cond ((keywordp color) ; Default color
+                  (ecase color
+                    (:black cl-charms:COLOR_BLACK)
+                    (:red cl-charms:COLOR_RED)
+                    (:green cl-charms:COLOR_GREEN)
+                    (:yellow cl-charms:COLOR_YELLOW)
+                    (:blue cl-charms:COLOR_BLUE)
+                    (:magenta cl-charms:COLOR_MAGENTA)
+                    (:cyan cl-charms:COLOR_CYAN)
+                    (:white cl-charms:COLOR_WHITE)))
+                 ((integerp color) ; Custom color
+                  (cl-charms:color-pair color)))))
         (t (error "Unknown attribute ~S" attribute))))
 
 (defmacro with-attributes ((&body attributes) frame &body body)
   "Enables given attributes, executes body and then ensures
 they're disabled."
-  (let ((attribute-names (apply #'logior
-                                (mapcar #'get-attribute-name-from-keyword attributes))))
-    `(unwind-protect
-          (progn
-            (cl-charms:wattron (slot-value (frame ,frame) 'window),attribute-names)
-            ,@body)
-       (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attribute-names))))
+  (with-gensyms (attribute-values attribute-codes attributes-sum)
+    `(let* ((,attribute-values (list ,@(mapcar (lambda (attr)
+                                                 (typecase attr
+                                                   (symbol attr)
+                                                   (list `(list ,@attr))))
+                                               attributes)))
+            (,attribute-codes (mapcar #'get-attribute-name-from-keyword ,attribute-values))
+            (,attributes-sum (apply #'logior ,attribute-codes)))
+       (unwind-protect
+            (progn
+              (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-sum)
+              ,@body)
+         (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-sum)))))
 
-(defvar *color-pairs* nil)
+(defvar *used-color-pairs* nil "Sorted list of used color pairs")
+(defvar *used-colors* nil "Sorted list of used colors")
 
-(defun color-pair-by-name (name)
-  (1+ (position name *color-pairs* :key #'first)))
+(eval-when (:execute :compile-toplevel :load-toplevel)
+  (defmacro take-id (var)
+    `(let ((id (loop
+                  :for tail :on ,var
+                  :do (when (null (cdr tail))
+                        (return (1+ (first tail))))
+                  :do (when (/= 1 (- (second tail) (first tail)))
+                        (return (1+ (first tail)))))))
+       (push id ,var)
+       (setf ,var (sort ,var #'<))
+       id)))
 
-(defun color-from-keyword (color)
-  (ecase color
-    (:black cl-charms:COLOR_BLACK)
-    (:red cl-charms:COLOR_RED)
-    (:green cl-charms:COLOR_GREEN)
-    (:yellow cl-charms:COLOR_YELLOW)
-    (:blue cl-charms:COLOR_BLUE)
-    (:magenta cl-charms:COLOR_MAGENTA)
-    (:cyan cl-charms:COLOR_CYAN)
-    (:white cl-charms:COLOR_WHITE)))
+(defun make-color (r g b)
+  (let ((free-id (take-id *used-colors*)))
+    (when-running
+      (unless (zerop (cl-charms:init-color free-id r g b))
+        (error "Looks like you've reached the limit of ~S colors" free-id)))
+    free-id))
 
-(defun defcolor (name fg bg)
-  (let ((pair (assoc name *color-pairs*)))
-    (if pair
-        (setf (cdr pair) (list fg bg))
-        (appendf *color-pairs* (list (list name fg bg)))))
-  (when *running*
-    (let ((id (color-pair-by-name name)))
-      (let ((result (cl-charms:init-pair id (color-from-keyword fg)
-                                         (color-from-keyword bg))))
-        (unless (zerop result)
-          (error "Error while initializing color pair: ~S~%Check if INIT-SCREEN is called with :colors attribute" result))))))
+(defun free-color (color)
+  (if (< color 8)
+      (error "Can't delete a default color")
+      (deletef *used-colors* color))
+  nil)
 
-(defun init-color-pairs ()
-  (loop
-     :for i from 1
-     :for color :in *color-pairs*
-     :do (apply #'cl-charms:init-pair i
-                (mapcar #'color-from-keyword (cdr color)))))
+(defun make-color-pair (fg bg)
+  (let ((free-id (take-id *used-color-pairs*)))
+    (when-running
+      (unless (zerop (cl-charms:init-pair free-id fg bg))
+        (error "Looks like you've reached the limit of ~S color pairs" free-id)))
+    free-id))
+
+(defun free-color-pair (pair)
+  (if (zerop pair)
+      (error "Can't free the default color pair")
+      (deletef *used-color-pairs* pair))
+  nil)

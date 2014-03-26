@@ -21,6 +21,7 @@
         (:cursor (cl-charms:curs-set 1))
         (:nocursor (cl-charms:curs-set 0))
         (:colors (init-color)))))
+  (do-delayed-init)
   (cl-charms:clear)
   (cl-charms:keypad cl-charms:*stdscr* 1)
   (cl-charms:curs-set 0)
@@ -39,7 +40,8 @@
 (defun init-color ()
   (cond ((= (cl-charms:has-colors) 1)
          (cl-charms:start-color)
-         (init-color-pairs))
+         (setf *used-colors* (list 0))
+         (setf *used-color-pairs* (list 0 1 2 3 4 5 6 7)))
         (t
          (error "Your terminal doesn't support color"))))
 

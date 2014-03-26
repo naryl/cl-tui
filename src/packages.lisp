@@ -19,7 +19,10 @@
 
            ; Common drawing routines
            #:with-attributes
-           #:defcolor
+           #:make-color
+           #:free-color
+           #:make-color-pair
+           #:free-color-pair
 
            ; Canvas frames
            #:retained-frame
