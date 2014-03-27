@@ -4,7 +4,7 @@ Cl-tui is a library for text user interfaces like that of [ncmpcpp](https://scre
 
 It's currently in development and not intended for general use.
 
-## Documentation
+# Documentation
 
 ### (defun init-screen (&rest arguments))
 
@@ -92,5 +92,12 @@ Free the color pair object making it usable for other colors.
 
 ### #:read-key
 
-## TODO
+## Frame types
+
+* retained-mode frame
+* callback frame
+* grid frame
+* Scrolling log frame
+
+# TODO
 See the [TODO list](https://bitbucket.org/naryl/cl-tui/src/default/TODO.wiki).

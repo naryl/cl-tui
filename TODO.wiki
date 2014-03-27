@@ -9,8 +9,7 @@
   * [X] Single cell
   * [X] Properly redefining frames
   * [ ] Proper hierarchy resizing
-  * [ ] One-dimension
-  * [ ] Two-dimension
+  * [ ] Horizontal-vertical layout
   * [ ] Tabbed layout (?)
  * [X] Windows with borders
 * [ ] Examples
@@ -30,9 +29,9 @@
   * [ ] Justified mode
   * [ ] Merging equal lines
   * [ ] Configurable (lambda?) timestamps
-* [ ] Drawing functions
+* [.] Drawing functions
  * [ ] Used for drawing text
- * [ ] Colors
+ * [X] Colors
  * [ ] Used by retained frame and callback frame
  * [ ] Cell buffer manipulation functions
 * [ ] Input handling
