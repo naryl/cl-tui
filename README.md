@@ -4,7 +4,7 @@ Cl-tui is a library for text user interfaces like that of [ncmpcpp](https://scre
 
 It's currently in development and not intended for general use.
 
-### [Documentation](/wiki/documentation)
+### Documentation
 
 ### TODO
 See the [TODO list](https://bitbucket.org/naryl/cl-tui/src/default/TODO.wiki).
