@@ -3,6 +3,7 @@
     :pathname "src/"
     :serial t
     :components ((:file "packages")
+                 (:file "macro")
                  (:file "layout")
                  (:file "frames")
                  (:file "drawers")
