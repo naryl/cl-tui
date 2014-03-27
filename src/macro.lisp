@@ -6,10 +6,10 @@
 (defmacro when-running (&body body)
   (with-gensyms (func)
     `(labels ((,func () ,@body))
-       (if *running*
-           (,func)
-           (push #',func *delayed-init*)))))
+       (when *running*
+         (,func))
+       (push #',func *delayed-init*)
+       nil)))
 
 (defun do-delayed-init ()
-  (mapc #'funcall (nreverse *delayed-init*))
-  (setf *delayed-init* nil))
+  (mapc #'funcall (nreverse *delayed-init*)))
