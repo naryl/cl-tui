@@ -67,22 +67,25 @@
                   (cl-charms:color-pair color)))))
         (t (error "Unknown attribute ~S" attribute))))
 
+(defun attributes-to-code (&rest attributes)
+  (let ((attribute-codes (mapcar #'get-attribute-name-from-keyword attributes)))
+    (apply #'logior attribute-codes)))
+
 (defmacro with-attributes ((&body attributes) frame &body body)
   "Enables given attributes, executes body and then ensures
 they're disabled."
-  (with-gensyms (attribute-values attribute-codes attributes-sum)
-    `(let* ((,attribute-values (list ,@(mapcar (lambda (attr)
-                                                 (typecase attr
-                                                   (symbol attr)
-                                                   (list `(list ,@attr))))
-                                               attributes)))
-            (,attribute-codes (mapcar #'get-attribute-name-from-keyword ,attribute-values))
-            (,attributes-sum (apply #'logior ,attribute-codes)))
+  (with-gensyms (attributes-code)
+    `(let (,attributes-code (attributes-to-code
+                             ,@(mapcar (lambda (attr)
+                                         (typecase attr
+                                           (symbol attr)
+                                           (list `(list ,@attr))))
+                                       attributes)))
        (unwind-protect
             (progn
-              (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-sum)
+              (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-code)
               ,@body)
-         (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-sum)))))
+         (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-code)))))
 
 (defvar *used-color-pairs* nil "Sorted list of used color pairs")
 (defvar *used-colors* nil "Sorted list of used colors")
