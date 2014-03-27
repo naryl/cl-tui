@@ -9,11 +9,12 @@ It's currently in development and not intended for general use.
 ### (defun init-screen (&rest arguments))
 
 Initializes the ncurses screen with the specified attributes.
-:echo/:noecho - echo input characters to screen
-:raw/:noraw - send keypresses without any processing
-:cbreak/:nocbreak - disable line buffering (disabled automatically if :raw)
-:cursor/:nocursor - show input cursor
-:colors - initialize colors system
+
+* :echo/:noecho - echo input characters to screen
+* :raw/:noraw - send keypresses without any processing
+* :cbreak/:nocbreak - disable line buffering (disabled automatically if :raw)
+* :cursor/:nocursor - show input cursor
+* :colors - initialize colors system
 
 ### (defun destroy-screen ())
 
@@ -42,16 +43,17 @@ Returns the list (y x) containing the frame size in screen characters.
 ### (defmacro with-attributes ((&body attributes) frame &body body))
 
 Runs the code with specified attributes set. Attributes are:
-:standout - draw highlighted text
-:underline - draw underlined text
-:reverse - draw text with reversed colors
-:blink - make text blinking
-:dim - less bright colors
-:bold - more bright colors or bold text
-:protect - protected mode
-:invis - invisible mode
-:altcharset - alternate character set
-(:color color-pair) - set text color
+
+* :standout - draw highlighted text
+* :underline - draw underlined text
+* :reverse - draw text with reversed colors
+* :blink - make text blinking
+* :dim - less bright colors
+* :bold - more bright colors or bold text
+* :protect - protected mode
+* :invis - invisible mode
+* :altcharset - alternate character set
+* (:color color-pair) - set text color
 
 ### (defun make-color (r g b))
 
