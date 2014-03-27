@@ -75,12 +75,12 @@
   "Enables given attributes, executes body and then ensures
 they're disabled."
   (with-gensyms (attributes-code)
-    `(let (,attributes-code (attributes-to-code
-                             ,@(mapcar (lambda (attr)
-                                         (typecase attr
-                                           (symbol attr)
-                                           (list `(list ,@attr))))
-                                       attributes)))
+    `(let ((,attributes-code (attributes-to-code
+                              ,@(mapcar (lambda (attr)
+                                          (typecase attr
+                                            (symbol attr)
+                                            (list `(list ,@attr))))
+                                        attributes))))
        (unwind-protect
             (progn
               (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-code)
