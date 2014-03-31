@@ -37,7 +37,10 @@
 
 ;;; Root frame definition
 (sunless (frame :root)
-  (setf it (make-instance 'retained-frame)))
+  (setf it
+        (make-instance 'retained-frame
+                       :name :root
+                       :split-type :vertical)))
 
 (defvar *display* :root)
 

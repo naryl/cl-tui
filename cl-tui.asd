@@ -3,8 +3,9 @@
     :pathname "src/"
     :serial t
     :components ((:file "packages")
-                 (:file "layout")
+                 (:file "macro")
                  (:file "frames")
+                 (:file "layout")
                  (:file "drawers")
                  (:file "cl-tui")
                  (:file "input")

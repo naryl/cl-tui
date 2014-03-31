@@ -1,98 +1,115 @@
 
 (in-package cl-tui)
 
-#|
-Layout is a list of lists of lists ad infinitum.
-Each list represents a horizontal/vertical row layout with odd levels being horizontal and
-even levels being vertical. Leaves are frames.
-Each element is a struct containing list/frame and layouting data (min-size, max-size and weight)
-|#
+(defun ensure-window (frame h w x1 y1 x2 y2 &optional (init-ncurses-window? t))
+  (with-slots (window) frame
+    (if window
+      (if (not (slot-value window 'window))
+        (when init-ncurses-window?
+          (setf (slot-value window 'window) (cl-charms:newwin h w y1 x1)))
+        (progn (cl-charms:mvwin (slot-value window 'window) y1 x1)
+               (cl-charms:wresize (slot-value window 'window) h w)
+               (setf (slot-value window 'x1) x1
+                     (slot-value window 'y1) y1
+                     (slot-value window 'x2) x2
+                     (slot-value window 'y2) y2)))
+      (setf window
+            (make-instance 'Window
+                           :x1 x1
+                           :y1 y1
+                           :x2 x2
+                           :y2 y2
+                           :window (when init-ncurses-window?
+                                     (cl-charms:newwin h w y1 x1)))))))
 
-(defstruct layout
-  (rows nil)
-  (cols nil)
-  (cells nil))
+;;; TODO Implement weights support
+;;; TODO Implement max-* and min-* support
+(defun calculate-layout (frame)
+  "Builds layout tree for given frame."
+  (with-slots (children parent split-type) frame
+    (let+ (((rows columns) (frame-size parent))
+           (limit (case split-type
+                    (:vertical columns)
+                    (:horizontal rows))))
+      (ensure-window frame rows columns 0 0 (1- columns) (1- rows) (when children nil))
+      (when children
+        (loop
+          with step = (ceiling (/ limit (length children)))
+          for child in children
+          for shift from 0 upto limit by step
+          doing
+             (calculate-layout child)
+             (progn
+               (with-slots (min-rows min-columns
+                            max-rows max-columns
+                            weight window)
+                   child
+                 (let* ((x1 (case split-type
+                              (:vertical shift)
+                              (:horizontal 0)))
+                        (y1 (case split-type
+                              (:vertical 0)
+                              (:horizontal shift)))
+                        (ncolumns (case split-type
+                                    (:vertical step)
+                                    (:horizontal columns)))
+                        (nrows (case split-type
+                                 (:vertical rows)
+                                 (:horizontal step)))
+                        (x2 (1- (+ x1 ncolumns)))
+                        (norm-x2 (if (<= columns x2)
+                                     (1- columns)
+                                     x2))
+                        (y2 (1- (+ y1 nrows)))
+                        (norm-y2 (if (<= rows y2)
+                                     (1- rows)
+                                     y2)))
+                   (ensure-window child nrows ncolumns x1 y1 norm-x2 norm-y2)))))))
+    t))
 
-(defstruct layout-row
-  (min-size 0)
-  (max-size 100500)
-  (weight 1)
-  (size 0))
+(defun refresh (&optional (frame *display*))
+  (labels ((is-frame-displayed (frame)
+             (cond ((eq frame *display*)
+                    t)
+                   ((eq frame nil)
+                    nil)
+                   (t
+                    (is-frame-displayed (slot-value (frame frame) 'parent)))))
+           (render-tree (frame)
+             (when frame
+               (with-slots (window children) frame
+                 (if children
+                   (mapcar #'render-tree children)
+                   (when (slot-value window 'window)
+                     (cl-charms:wnoutrefresh (slot-value window 'window))))))))
+    (cond ((is-frame-displayed frame)
+           (render-tree (frame frame))
+           (cl-charms:doupdate))
+          (t (cerror "Attempt to refresh a frame ~S which is not a child of current root ~S"
+                     frame *display*)))
+    nil))
 
-(defstruct layout-col
-  (min-size 0)
-  (max-size 100500)
-  (weight 1)
-  (size 0))
+(defgeneric render (frame)
+  (:documentation "Displays the frame on screen. FRAME is the object here. Not the name")
+  (:method :before (frame)
+    nil))
 
-(defstruct layout-cell
-  frame left right top bottom)
+(defun resize ()
+  "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
+  (calculate-layout (frame *display*)))
 
-(defmacro do-cells ((frame left right top bottom) layout &body body)
-  (once-only (layout)
-    (with-gensyms (cell)
-      `(dolist (,cell (layout-cells ,layout))
-         (let ((,frame (layout-cell-frame ,cell))
-               (,left (layout-cell-left ,cell))
-               (,right (layout-cell-right ,cell))
-               (,top (layout-cell-top ,cell))
-               (,bottom (layout-cell-bottom ,cell)))
-           ,@body)))))
+(defmethod render ((frame retained-frame))
+  nil)
 
-(defun layout-insert (layout frame-name)
-  (let ((cell (make-layout-cell :frame frame-name
-                                :left 0
-                                :right 0
-                                :top 0
-                                :bottom 0)))
-    (setf (layout-rows layout) (list (make-layout-row))
-          (layout-cols layout) (list (make-layout-col))
-          (layout-cells layout) (list cell))))
+(defmethod render ((frame callback-frame))
+  (with-slots (render window) frame
+    (cl-charms:wclear (slot-value window 'window))
+    (when render
+      (funcall render))))
 
-(defun layout-remove (layout frame)
-  (setf (layout-rows layout) nil
-        (layout-cols layout) nil
-        (layout-cells layout) nil))
-
-(defun layout-frames (layout)
-  (mapc #'layout-cell-frame (layout-cells layout)))
-
-(defun recalculate-layout (layout width height)
-  "Recalculate rows and cols min- and max-size and weight. Then their size."
-  (when (and (layout-cols layout)
-             (layout-rows layout))
-    (setf (layout-col-size (first (layout-cols layout))) width
-          (layout-row-size (first (layout-rows layout))) height)
-    (let* ((cell (first (layout-cells layout)))
-           (frame (layout-cell-frame cell)))
-      (ensure-window frame width height 0 0)
-      (awhen (slot-value (frame frame) 'children)
-        (recalculate-layout it width height)))))
-
-#|
-(defun pack (frame place anchor &key (min-size 0) (max-size 100500) (weight 1))
-  "Place frame in layout relative to anchor"
-  (let ((anchor (find anchor (layout-cells *layout*) :key #'layout-cell-frame))
-        (new-left (layout-cell-left anchor))
-        (new-right (layout-cell-right anchor))
-        (new-top (layout-cell-top anchor))
-        (new-bottom (layout-cell-bottom anchor)))
-    (case place
-      (:left-of (setf new-left (layout-cell-left anchor))
-                (setf new-right (layout-cell-left anchor)))
-      (:right-of (setf new-left (1+ (layout-cell-right anchor)))
-                 (setf new-right (1+ (layout-cell-right anchor))))
-      (:above (setf new-top (layout-cell-top anchor))
-              (setf new-bottom (layout-cell-top anchor)))
-      (:below (setf new-top (1+ (layout-cell-bottom anchor)))
-              (setf new-bottom (1+ (layout-cell-bottom anchor))))))
-  ;; TODO: Fix rows, columns and other frames' placement here
-  (push (make-layout-cell :frame frame
-                          :left new-left
-                          :right new-right
-                          :top new-top
-                          :bottom new-bottom
-                          :min-size)
-        (layout-cells *layout*)))
-
-|#
+(defmethod render ((frame text-frame))
+  (with-slots (window text) frame
+    (cl-charms:wclear (slot-value window 'window))
+    (loop :for i :from 0
+       :for line :in text
+       :do (cl-charms:mvwaddstr window i 0 text))))
