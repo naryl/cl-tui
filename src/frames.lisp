@@ -24,7 +24,7 @@
            :initform nil)
    (children :type (or null layout)
              :initform nil)
-   (split-type :type (or :vertical :horizontal)
+   (split-type :type (member :vertical :horizontal)
                :initarg :split-type)
    (window :initform nil
            :documentation "Describes frame position and size. Initialized by layouter.")))
@@ -60,8 +60,8 @@
           (when *running* (resize))))
 
 (defun destroy-window (window)
-  (when window
-    (with-slots (window) window
+  (with-slots (window) window
+    (when window
       (cl-charms:delwin window))))
 
 (defgeneric destroy-frame (frame))
@@ -85,7 +85,7 @@
     (if (not (numberp position))
       (push (frame child) children)
       (setf children (append (subseq children 0 (1+ position))
-                             (frame child)
+                             (list (frame child))
                              (subseq children (1+ position)))))
     (setf (slot-value (frame child) 'parent) parent)))
 

@@ -7,7 +7,7 @@
 
 (defun main-render2 ()
     (destructuring-bind (x y)
-        (frame-size (frame 'callback))
+        (frame-size (cl-tui::frame 'callback))
       (put-char 'callback 2 2 #\+)
       (put-char 'callback 2 (- x 3) #\+)
       (put-char 'callback (- y 3) 2 #\+)
