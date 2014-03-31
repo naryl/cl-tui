@@ -6,15 +6,23 @@
         :anaphora)
   (:export #:init-screen
            #:destroy-screen
-
-           ; Other stuff
-           #:frame-size
-           #:define-frame
-           #:destroy-frame
+           #:with-screen
 
            ; Updates
            #:display
            #:refresh
+
+           ; Frames
+           #:frame-size
+           #:define-frame
+           #:destroy-frame
+
+           ; Common drawing routines
+           #:with-attributes
+           #:make-color
+           #:free-color
+           #:make-color-pair
+           #:free-color-pair
 
            ; Canvas frames
            #:retained-frame
