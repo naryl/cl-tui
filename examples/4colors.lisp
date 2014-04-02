@@ -24,22 +24,18 @@
                           :collect (make-color-pair
                                     (elt gradient (1+ i))
                                     (elt gradient i))))
-
-(init-screen :colors)
-
 (defun main-render ()
-  (dotimes (i 36)
-    (with-attributes ((:color (elt rainbow-pairs (mod i 6)))) 'callback
-      (put-char 'callback (1+ i) 1 #\X)))
-  (dotimes (i 20)
-    (with-attributes ((:color (elt gradient-pairs i))) 'callback
-      (dotimes (j 3)
-        (put-char 'callback (1+ i) (+ 2 j) #\X)))))
+      (dotimes (i 36)
+        (with-attributes ((:color (elt rainbow-pairs (mod i 6)))) 'callback
+          (put-char 'callback (1+ i) 1 #\X)))
+      (dotimes (i 20)
+        (with-attributes ((:color (elt gradient-pairs i))) 'callback
+          (dotimes (j 3)
+            (put-char 'callback (1+ i) (+ 2 j) #\X)))))
 
 (define-frame callback (callback-frame :render 'main-render) :on :root)
 
-(refresh)
-
-(read-key)
-
-(destroy-screen)
+(defun main ()
+  (with-screen (:colors)
+    (refresh)
+    (read-key)))

@@ -143,7 +143,10 @@ which is not a child of current root ~S" frame *display*)))
   (with-slots (render window) frame
     (cl-charms:wclear window)
     (when render
-      (funcall render))))
+      (funcall render
+               :y (cl-charms:getmaxy window)
+               :x (cl-charms:getmaxx window)
+               :allow-other-keys t))))
 
 ;;; Text frame
 

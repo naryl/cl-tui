@@ -1,11 +1,8 @@
 
-
 (defpackage cl-tui.examples
   (:use :cl :cl-tui))
 
 (in-package cl-tui.examples)
-
-(init-screen)
 
 (define-frame callback (callback-frame) :on :root)
 
@@ -16,10 +13,10 @@
     (put-char 'callback 2 (- x 3) #\+)
     (put-char 'callback (- y 3) 2 #\+)
     (put-char 'callback (- y 3) (- x 3) #\+)))
+
 (define-frame callback2 (callback-frame :render 'main-render2) :on callback)
 
-(refresh)
-
-(read-key)
-
-(destroy-screen)
+(defun main ()
+  (cl-tui:with-screen ()
+    (refresh)
+    (read-key)))
