@@ -11,7 +11,8 @@
   (put-char 'callback (1- y) 0 #\+)
   (put-char 'callback (1- y) (1- x) #\+))
 
-(define-frame callback (callback-frame :render 'main-render) :on :root)
+(define-frame callback (callback-frame :render 'main-render)
+  :parent t)
 
 (defun frame ()
   (with-screen ()

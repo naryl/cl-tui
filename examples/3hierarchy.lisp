@@ -12,12 +12,12 @@
   (put-char 'callback (- y 3) (- x 3) #\+))
 
 (define-frame callback (callback-frame)
-              :parent :root
-              :split-type :horizontal)
+  :parent :root
+  :split-type :horizontal)
 
 (define-frame callback2 (callback-frame :render 'main-render2)
-              :parent callback
-              :split-type :vertical)
+  :parent callback
+  :split-type :vertical)
 
 (defun hierarchy ()
   (cl-tui:with-screen ()

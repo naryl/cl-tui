@@ -36,9 +36,9 @@
 
 (defmacro define-frame (name (type &rest frame-args)
                        &key (parent nil)
-                         split-type position
+                         (split-type :none) position
                          max-columns min-columns max-rows min-rows weight)
-  (unless (find split-type '(:vertical :horizontal))
+  (unless (find split-type '(:vertical :horizontal :none))
     (error "Unknown split type: ~S" split-type))
   (when (eq parent t)
     (setf parent :root))
@@ -108,7 +108,7 @@ Default FRAME is the whole screen."
           (list (1+ (- x2 x1))
                 (1+ (- y2 y1))))))))
 
-(defun ensure-window (frame h w x1 y1 x2 y2 &optional (init-ncurses-window? t))
+(defun ensure-window (frame h w x1 y1 x2 y2)
   (with-slots (window) frame
     (if window
       (if (not (slot-value window 'window))
@@ -126,7 +126,9 @@ Default FRAME is the whole screen."
                            :y1 y1
                            :x2 x2
                            :y2 y2
-                           :window (when init-ncurses-window?
+                           ;; Implement this with a generic. Containers should forbid a
+                           ;; lot of things, not just ncurses windows
+                           :window (unless (eq (type-of frame) 'container-frame)
                                      (cl-charms:newwin h w y1 x1)))))))
 
 ;;; TODO Implement weights support
@@ -138,7 +140,7 @@ Default FRAME is the whole screen."
            (limit (case split-type
                     (:vertical columns)
                     (:horizontal rows))))
-      (ensure-window frame rows columns 0 0 (1- columns) (1- rows) (when children nil))
+      (ensure-window frame rows columns 0 0 (1- columns) (1- rows))
       (when children
         (loop
           with step = (ceiling (/ limit (length children)))

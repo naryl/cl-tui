@@ -12,7 +12,7 @@
   (with-slots (window) frame
     (cl-charms:mvwaddstr (slot-value window 'window) y x str)))
 
-(defun/frame put-char canvas-frame (frame x y c)
+(defun/frame put-char canvas-frame (frame y x c)
   (with-slots (window) frame
     (cl-charms:mvwaddstr (slot-value window 'window) y x (string c))))
 

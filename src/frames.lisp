@@ -5,6 +5,10 @@
 
 ;;;; FRAME TYPES
 
+;;; Dummy frame for holding other frames
+
+(defclass container-frame (frame) ())
+
 ;;; Canvas frame superclass (for frames allowed to use simple drawing functions)
 
 (defclass canvas-frame (frame) ())
