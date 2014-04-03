@@ -4,8 +4,8 @@
     :serial t
     :components ((:file "packages")
                  (:file "macro")
-                 (:file "frames")
                  (:file "layout")
+                 (:file "frames")
                  (:file "drawers")
                  (:file "cl-tui")
                  (:file "input")

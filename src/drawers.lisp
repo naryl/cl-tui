@@ -75,20 +75,20 @@
   "Enables given attributes, executes body and then ensures
 they're disabled."
   (with-gensyms (attributes-code)
-    `(let (,attributes-code (attributes-to-code
-                             ,@(mapcar (lambda (attr)
-                                         (typecase attr
-                                           (symbol attr)
-                                           (list `(list ,@attr))))
-                                       attributes)))
+    `(let ((,attributes-code (attributes-to-code
+                              ,@(mapcar (lambda (attr)
+                                          (typecase attr
+                                            (symbol attr)
+                                            (list `(list ,@attr))))
+                                        attributes))))
        (unwind-protect
             (progn
               (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-code)
               ,@body)
          (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-code)))))
 
-(defvar *used-color-pairs* nil "Sorted list of used color pairs")
-(defvar *used-colors* nil "Sorted list of used colors")
+(defvar *used-color-pairs* (list 0) "Sorted list of used color pairs")
+(defvar *used-colors* (list 0 1 2 3 4 5 6 7) "Sorted list of used colors")
 
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (defmacro take-id (var)
