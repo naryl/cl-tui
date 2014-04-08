@@ -37,6 +37,15 @@
   (setf *running* nil)
   nil)
 
+(defmacro with-screen ((&body arguments) &body body)
+  "Ensures that wrapped code will be executed after successful
+initialization of screen and that screen will be properly
+deinitialized after `body' is executed (or reaised error)."
+  `(unwind-protect
+        (progn (init-screen ,@arguments)
+               ,@body)
+     (destroy-screen)))
+
 (defun init-color ()
   (cond ((= (cl-charms:has-colors) 1)
          (cl-charms:start-color)
@@ -45,12 +54,12 @@
         (t
          (error "Your terminal doesn't support color"))))
 
+(defclass root-frame (canvas-frame container-frame) ())
+
 ;;; Root frame definition
 (sunless (frame :root)
   (setf it
-        (make-instance 'retained-frame
-                       :name :root
-                       :split-type :vertical)))
+        (make-instance 'root-frame)))
 
 (defvar *display* :root)
 
@@ -60,12 +69,3 @@
   (setf *display* frame)
   (resize)
   (refresh))
-
-(defmacro with-screen ((&body arguments) &body body)
-  "Ensures that wrapped code will be executed after successful
-initialization of screen and that screen will be properly
-deinitialized after `body' is executed (or reaised error)."
-  `(unwind-protect
-        (progn (init-screen ,@arguments)
-               ,@body)
-     (destroy-screen)))

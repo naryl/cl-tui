@@ -10,11 +10,11 @@
 
 (defun/frame put-text canvas-frame (frame y x str)
   (with-slots (window) frame
-    (cl-charms:mvwaddstr (slot-value window 'window) y x str)))
+    (cl-charms:mvwaddstr window y x str)))
 
 (defun/frame put-char canvas-frame (frame y x c)
   (with-slots (window) frame
-    (cl-charms:mvwaddstr (slot-value window 'window) y x (string c))))
+    (cl-charms:mvwaddstr window y x (string c))))
 
 ;;; Text frame-specific
 
