@@ -95,18 +95,15 @@
   "Returns size of terminal screen."
   (let (rows columns)
     (cl-charms:getmaxyx cl-charms:*stdscr* rows columns)
-    (list columns rows)))
+    (list rows columns)))
 
 (defun frame-size (&optional frame)
   "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet.
 Default FRAME is the whole screen."
   (if (not frame)
     (get-screen-size)
-    (let ((window (slot-value frame 'window)))
-      (when window
-        (with-slots (x1 y1 x2 y2) window
-          (list (1+ (- x2 x1))
-                (1+ (- y2 y1))))))))
+    (list (slot-value frame 'h)
+          (slot-value frame 'w))))
 
 (defun is-frame-displayed (frame)
   (cond ((eq frame *display*)
@@ -120,16 +117,15 @@ Default FRAME is the whole screen."
   (cond ((is-frame-displayed frame)
          (render (frame frame))
          (cl-charms:doupdate))
-        (t (cerror "Attempt to refresh a frame ~S which is not a child of current root ~S"
+        (t (cerror "Ignore" "Attempt to refresh a frame ~S which is not a child of current root ~S"
                    frame *display*)))
   nil)
 
 (defgeneric render (frame)
-  (:documentation "Displays the frame on screen. FRAME is the object here. Not the name")
-  (:method :after ((frame frame))
-    (with-slots (window) frame
-      (when window
-        (cl-charms:wnoutrefresh window)))))
+  (:documentation "Displays the frame on screen. FRAME is the object here. Not the name.
+
+If the frame has both children and own rendering cl-charms:wnoutrefresh should be called
+after drawing itself but before drawing children."))
 
 (defun resize ()
   "Makes sure *DISPLAY* frame and all its children have proper place on the screen"

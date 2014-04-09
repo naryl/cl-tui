@@ -55,6 +55,7 @@
                     (calculate-layout (car child)))))))))
 
 (defmethod render ((frame container-frame))
+  (cl-charms:wnoutrefresh (slot-value frame 'window))
   (mapcar (compose #'render #'frame #'car)
           (slot-value frame 'children)))
 
@@ -84,7 +85,8 @@
       (funcall render
                :h (cl-charms:getmaxy window)
                :w (cl-charms:getmaxx window)
-               :allow-other-keys t))))
+               :allow-other-keys t))
+    (cl-charms:wnoutrefresh window)))
 
 ;;; Text frame
 
@@ -97,4 +99,5 @@
     (cl-charms:wclear (slot-value window 'window))
     (loop :for i :from 0
        :for line :in text
-       :do (cl-charms:mvwaddstr window i 0 text))))
+       :do (cl-charms:mvwaddstr window i 0 text))
+    (cl-charms:wnoutrefresh window)))

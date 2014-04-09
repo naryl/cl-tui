@@ -6,26 +6,35 @@
   characters put into queue by UNGETCH are not immediately read by GETCH. GETCH can
   receive them only on the next call.")
 
+(defvar *need-resize* nil)
+
 ;;; FIXME:
 ;;; No idea what to do on e.g. Windows and a few other implementations without signal
-;;; handlers support. Rely on ncurses build with --with-sigwinch for now.
+;;; handlers support.
 #+sbcl
-(sb-sys:enable-interrupt sb-posix:sigwinch
-                         (lambda (a b c)
-                           (declare (ignore a b c))
-                           (if *in-getch*
-                               (progn
-                                 (resize)
-                                 (refresh))
-                               (cl-charms:ungetch cl-charms:key_resize))))
+(defun sigwinch-handler (a b c)
+  (declare (ignore a b c))
+  (if *in-getch*
+      (ncurses-resize)
+      (setf *need-resize* t)))
+
+#+sbcl
+(sb-sys:enable-interrupt sb-posix:sigwinch #'sigwinch-handler)
 
 (defun read-key ()
   ;; Using SETF instead of LET because sigwinch handler doesn't see the dynamic binding
+  (when *need-resize*
+    (setf *need-resize* nil)
+    (ncurses-resize))
   (setf *in-getch* t)
   (let ((key (cl-charms:getch)))
     (setf *in-getch* nil)
-    (cond ((eql key cl-charms:key_resize)
-           (resize)
-           (refresh)
+    (cond ((eql key cl-charms:key_resize) ; Ignore it
            (read-key))
           (t key))))
+
+(defun ncurses-resize ()
+  (cl-charms:endwin)
+  (cl-charms:refresh)
+  (resize)
+  (refresh))
