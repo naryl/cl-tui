@@ -4,12 +4,7 @@
 ;;;; Frame
 
 (defclass frame ()
-  ((max-rows :initarg :max-rows)
-   (max-columns :initarg :max-columns)
-   (min-rows :initarg :min-rows)
-   (min-columns :initarg :min-columns)
-   (weight :initarg :weight)
-   (parent :type (or frame null)
+  ((parent :type (or frame null)
            :initarg :parent
            :initform nil)
    ;; Actual coordinates used by the layouter
@@ -49,6 +44,8 @@
   calls itself on them.
 
   The default method does nothing and should be overloaded in container frames.")
+  (:method ((name symbol))
+    (calculate-layout (frame name)))
   (:method ((frame frame))
     nil))
 
@@ -60,27 +57,18 @@
   `(setf (get ,name 'frame) ,value))
 
 (defmacro define-frame (name (type &rest frame-args)
-                       &key (parent nil)
-                         (split-type :none) position
-                         max-columns min-columns max-rows min-rows weight)
-  (unless (find split-type '(:vertical :horizontal :none))
-    (error "Unknown split type: ~S" split-type))
+                        &rest placement &key ((:on parent) nil))
   (when (eq parent t)
     (setf parent :root))
   `(progn (setf (frame ',name)
                 (make-instance ',type ,@frame-args
-                               :name ',name
-                               :parent (frame ',parent)
-                               :min-columns ,min-columns
-                               :max-columns ,max-columns
-                               :min-rows ,min-rows
-                               :max-rows ,max-rows
-                               :weight ,weight
-                               :split-type ,split-type))
+                               :parent ',parent))
           ,@(when parent
-                  (list `(add-child (frame ',parent) ',name ',position)))
-          ',name
-          (when *running* (resize))))
+                  (list `(add-child ',parent ',name ,@placement)))
+          (when (and *running*
+                     (is-frame-displayed ',name))
+            (resize))
+          ',name))
 
 (defun destroy-frame (name)
   (let ((frame (frame name)))
@@ -93,18 +81,15 @@
         (remprop name 'frame)
         t))))
 
-(defun add-child (parent child position)
-  (with-slots (children) parent
-    (if (not (numberp position))
-      (push child children)
-      (setf children (append (subseq children 0 (1+ position))
-                             (list (frame child))
-                             (subseq children (1+ position)))))
-    (setf (slot-value (frame child) 'parent) parent)))
+(defgeneric add-child (parent child &rest placement)
+  (:documentation "Add a child to a container frame")
+  (:method ((parent symbol) child &rest placement)
+    (apply #'add-child (frame parent) child placement)))
 
-(defun remove-child (parent child)
-  (with-slots (children) parent
-    (setf children (remove child children))))
+(defgeneric remove-child (parent child)
+  (:documentation "Remove a child from a container frame")
+  (:method ((parent symbol) child)
+    (remove-child (frame parent) child)))
 
 (defun get-screen-size ()
   "Returns size of terminal screen."
@@ -123,23 +108,21 @@ Default FRAME is the whole screen."
           (list (1+ (- x2 x1))
                 (1+ (- y2 y1))))))))
 
-;;; TODO Implement weights support
-;;; TODO Implement max-* and min-* support
+(defun is-frame-displayed (frame)
+  (cond ((eq frame *display*)
+         t)
+        ((eq frame nil)
+         nil)
+        (t
+         (is-frame-displayed (slot-value (frame frame) 'parent)))))
 
 (defun refresh (&optional (frame *display*))
-  (labels ((is-frame-displayed (frame)
-             (cond ((eq frame *display*)
-                    t)
-                   ((eq frame nil)
-                    nil)
-                   (t
-                    (is-frame-displayed (slot-value (frame frame) 'parent))))))
-    (cond ((is-frame-displayed frame)
-           (render (frame frame))
-           (cl-charms:doupdate))
-          (t (cerror "Attempt to refresh a frame ~S which is not a child of current root ~S"
-                     frame *display*)))
-    nil))
+  (cond ((is-frame-displayed frame)
+         (render (frame frame))
+         (cl-charms:doupdate))
+        (t (cerror "Attempt to refresh a frame ~S which is not a child of current root ~S"
+                   frame *display*)))
+  nil)
 
 (defgeneric render (frame)
   (:documentation "Displays the frame on screen. FRAME is the object here. Not the name")
