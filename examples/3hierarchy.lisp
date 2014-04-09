@@ -5,21 +5,17 @@
 
 (in-package cl-tui.examples)
 
-(defun main-render2 (&key x y)
-  (put-char 'callback 2 2 #\+)
-  (put-char 'callback 2 (- x 3) #\+)
-  (put-char 'callback (- y 3) 2 #\+)
-  (put-char 'callback (- y 3) (- x 3) #\+))
+(defun main-render2 (&key h w)
+  (put-char 'callback2 2 2 #\+)
+  (put-char 'callback2 2 (- w 3) #\+)
+  (put-char 'callback2 (- h 3) 2 #\+)
+  (put-char 'callback2 (- h 3) (- w 3) #\+))
 
-(define-frame callback (callback-frame)
-  :parent :root
-  :split-type :horizontal)
+(define-frame callback (container-frame) :on :root)
 
-(define-frame callback2 (callback-frame :render 'main-render2)
-  :parent callback
-  :split-type :vertical)
+(define-frame callback2 (callback-frame :render 'main-render2) :on callback)
 
 (defun hierarchy ()
   (cl-tui:with-screen ()
     (refresh)
-    (read-key)))
+    (loop :until (= 32 (read-key)))))

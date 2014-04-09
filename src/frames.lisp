@@ -54,9 +54,8 @@
                     (show-window (car child) h w y x)
                     (calculate-layout (car child)))))))))
 
-(defmethod render ((frame container-frame))
-  (cl-charms:wnoutrefresh (slot-value frame 'window))
-  (mapcar (compose #'render #'frame #'car)
+(defmethod render-children ((frame container-frame))
+  (mapcar (compose #'render-frame #'frame #'car)
           (slot-value frame 'children)))
 
 ;;; Canvas frame superclass (for frames allowed to use simple drawing functions)
@@ -78,15 +77,14 @@
            :initform nil
            :initarg :render)))
 
-(defmethod render ((frame callback-frame))
+(defmethod render-self ((frame callback-frame))
   (with-slots (render window) frame
     (cl-charms:wclear window)
     (when render
       (funcall render
                :h (cl-charms:getmaxy window)
                :w (cl-charms:getmaxx window)
-               :allow-other-keys t))
-    (cl-charms:wnoutrefresh window)))
+               :allow-other-keys t))))
 
 ;;; Text frame
 
@@ -94,10 +92,9 @@
   ((text :type string
          :initform "")))
 
-(defmethod render ((frame text-frame))
+(defmethod render-self ((frame text-frame))
   (with-slots (window text) frame
     (cl-charms:wclear (slot-value window 'window))
     (loop :for i :from 0
        :for line :in text
-       :do (cl-charms:mvwaddstr window i 0 text))
-    (cl-charms:wnoutrefresh window)))
+       :do (cl-charms:mvwaddstr window i 0 text))))

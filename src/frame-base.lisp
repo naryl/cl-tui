@@ -58,6 +58,7 @@
 
 (defmacro define-frame (name (type &rest frame-args)
                         &rest placement &key ((:on parent) nil))
+  (remf placement :on)
   (when (eq parent t)
     (setf parent :root))
   `(progn (setf (frame ',name)
@@ -113,19 +114,29 @@ Default FRAME is the whole screen."
         (t
          (is-frame-displayed (slot-value (frame frame) 'parent)))))
 
+(defun render-frame (frame)
+  (render-self frame)
+  (awhen (slot-value frame 'window)
+    (cl-charms:wnoutrefresh it))
+  (render-children frame))
+
 (defun refresh (&optional (frame *display*))
   (cond ((is-frame-displayed frame)
-         (render (frame frame))
+         (render-frame (frame frame))
          (cl-charms:doupdate))
         (t (cerror "Ignore" "Attempt to refresh a frame ~S which is not a child of current root ~S"
                    frame *display*)))
   nil)
 
-(defgeneric render (frame)
-  (:documentation "Displays the frame on screen. FRAME is the object here. Not the name.
+(defgeneric render-self (frame)
+  (:documentation "Displays the frame on screen. FRAME is the object here. Not the name.")
+  (:method ((frame frame))
+    nil))
 
-If the frame has both children and own rendering cl-charms:wnoutrefresh should be called
-after drawing itself but before drawing children."))
+(defgeneric render-children (frame)
+  (:documentation "Render children for containers")
+  (:method ((frame frame))
+    nil))
 
 (defun resize ()
   "Makes sure *DISPLAY* frame and all its children have proper place on the screen"

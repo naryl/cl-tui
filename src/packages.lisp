@@ -24,6 +24,9 @@
            #:make-color-pair
            #:free-color-pair
 
+           ; Containers
+           #:container-frame
+
            ; Canvas frames
            #:retained-frame
            #:callback-frame
