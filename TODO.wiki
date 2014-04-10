@@ -10,7 +10,8 @@
   * [X] Properly redefining frames
   * [ ] Proper hierarchy resizing
   * [ ] Horizontal-vertical layout
-  * [ ] Tabbed layout (?)
+  * [ ] Min-max-weight for layouts
+  * [ ] Tabbed layout
  * [X] Windows with borders
 * [ ] Examples
   * [ ] Example for multiple "scenes" and (DISPLAY 'non-root)
@@ -26,7 +27,6 @@
   * [X] Frame class
   * [ ] Auto line wrap
   * [ ] Scrolling text
-  * [ ] Justified mode
   * [ ] Merging equal lines
   * [ ] Configurable (lambda?) timestamps
 * [.] Drawing functions
