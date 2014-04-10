@@ -14,3 +14,9 @@
 (defun do-delayed-init ()
   (mapc #'funcall (nreverse *delayed-init*))
   (setf *delayed-init* nil))
+
+(defmacro ensure-ok (form)
+  (with-gensyms (result)
+    `(let ((,result ,form))
+       (unless (= ,result cl-charms:ok)
+         (cerror "Ignore" "Something went wrong here")))))

@@ -27,11 +27,13 @@
     (setf *need-resize* nil)
     (ncurses-resize))
   (setf *in-getch* t)
-  (let ((key (cl-charms:getch)))
+  (let ((key (cl-charms:get-wch)))
     (setf *in-getch* nil)
     (cond ((eql key cl-charms:key_resize) ; Ignore it
            (read-key))
-          (t key))))
+          ((<= 401 key 633) ; ncurses special key constants
+           key)
+          (t (code-char key))))) ; Simple character
 
 (defun ncurses-resize ()
   (cl-charms:endwin)

@@ -11,7 +11,7 @@
   ((children :initform nil
              :documentation "Alist of frame names and any placement arguments.")
    (split-type :type (member :none :vertical :horizontal)
-               :initform :none)))
+               :initform :vertical)))
 
 (defmethod add-child ((frame container-frame) child &rest placement)
   (with-slots (children) frame
@@ -32,19 +32,19 @@
            (calculate-layout (caar children)))
           (t
            (let ((limit (ecase split-type
-                          (:vertical w)
-                          (:horizontal h))))
+                          (:vertical h)
+                          (:horizontal w))))
              (loop
-                with step = (ceiling (/ limit (length children)))
+                with step = (truncate limit (length children))
                 for child in children
                 for shift from 0 upto limit by step
                 doing
                   (let ((x (+ x (case split-type
-                                  (:vertical shift)
-                                  (:horizontal 0))))
-                        (y (+ y (case split-type
                                   (:vertical 0)
                                   (:horizontal shift))))
+                        (y (+ y (case split-type
+                                  (:vertical shift)
+                                  (:horizontal 0))))
                         (h (case split-type
                              (:vertical step)
                              (:horizontal h)))
@@ -55,7 +55,7 @@
                     (calculate-layout (car child)))))))))
 
 (defmethod render-children ((frame container-frame))
-  (mapcar (compose #'render-frame #'frame #'car)
+  (mapcar (compose #'render-frame #'car)
           (slot-value frame 'children)))
 
 ;;; Canvas frame superclass (for frames allowed to use simple drawing functions)
@@ -74,17 +74,24 @@
 
 (defclass callback-frame (canvas-frame)
   ((render :type function
-           :initform nil
-           :initarg :render)))
+           :initform nil)))
+
+(defmethod initialize-instance ((frame callback-frame) &key name render)
+  (call-next-method)
+  (when render
+    (setf (slot-value frame 'render)
+          (lambda ()
+            (funcall render
+                     :frame name
+                     :h (cl-charms:getmaxy (slot-value frame 'window))
+                     :w (cl-charms:getmaxx (slot-value frame 'window))
+                     :allow-other-keys t)))))
 
 (defmethod render-self ((frame callback-frame))
   (with-slots (render window) frame
     (cl-charms:wclear window)
     (when render
-      (funcall render
-               :h (cl-charms:getmaxy window)
-               :w (cl-charms:getmaxx window)
-               :allow-other-keys t))))
+      (funcall render))))
 
 ;;; Text frame
 

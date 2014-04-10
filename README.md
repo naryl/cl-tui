@@ -16,6 +16,8 @@ Initializes the ncurses screen with the specified attributes.
 * :cursor/:nocursor - show input cursor
 * :colors - initialize colors system
 
+Note that calling init-screen or with-screen several times in the same image may or may not break something.
+
 ### (defun destroy-screen ())
 
 Destroys the ncurses screen. Note that you'll probably have a lot of weird behaviour currently if you try to start it back again.
@@ -23,6 +25,8 @@ Destroys the ncurses screen. Note that you'll probably have a lot of weird behav
 ### (defmacro with-screen ((&body arguments) &body body))
 
 Runs the body between init-screen and destroy-screen
+
+Note that calling init-screen or with-screen several times in the same image may or may not break something.
 
 ### (defun display (&optional (frame :root)))
 
@@ -38,7 +42,7 @@ Returns the list (y x) containing the frame size in screen characters.
 
 ### define-frame
 
-### #:destroy-frame
+### destroy-frame
 
 ### (defmacro with-attributes ((&body attributes) frame &body body))
 

@@ -26,8 +26,9 @@
             x nx)
       (when (frame-drawable-p frame)
         (cond (window
-               (cl-charms:mvwin window y x)
-               (cl-charms:wresize window h w))
+               (ensure-ok (cl-charms:wresize window 1 1))
+               (ensure-ok (cl-charms:mvwin window y x))
+               (ensure-ok (cl-charms:wresize window h w)))
               (t
                (setf window (cl-charms:newwin h w y x))))))))
 
@@ -63,6 +64,7 @@
     (setf parent :root))
   `(progn (setf (frame ',name)
                 (make-instance ',type ,@frame-args
+                               :name ',name
                                :parent ',parent))
           ,@(when parent
                   (list `(add-child ',parent ',name ,@placement)))
@@ -116,13 +118,13 @@ Default FRAME is the whole screen."
 
 (defun render-frame (frame)
   (render-self frame)
-  (awhen (slot-value frame 'window)
+  (awhen (slot-value (frame frame) 'window)
     (cl-charms:wnoutrefresh it))
   (render-children frame))
 
 (defun refresh (&optional (frame *display*))
   (cond ((is-frame-displayed frame)
-         (render-frame (frame frame))
+         (render-frame frame)
          (cl-charms:doupdate))
         (t (cerror "Ignore" "Attempt to refresh a frame ~S which is not a child of current root ~S"
                    frame *display*)))
@@ -131,12 +133,16 @@ Default FRAME is the whole screen."
 (defgeneric render-self (frame)
   (:documentation "Displays the frame on screen. FRAME is the object here. Not the name.")
   (:method ((frame frame))
-    nil))
+    nil)
+  (:method ((name symbol))
+    (render-self (frame name))))
 
 (defgeneric render-children (frame)
   (:documentation "Render children for containers")
   (:method ((frame frame))
-    nil))
+    nil)
+  (:method ((name symbol))
+    (render-children (frame name))))
 
 (defun resize ()
   "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
