@@ -30,6 +30,7 @@
            ; Canvas frames
            #:retained-frame
            #:callback-frame
+           #:draw-box
            #:put-char
            #:put-text
 

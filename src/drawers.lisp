@@ -8,12 +8,6 @@
        (check-type ,frame-var ,type)
        ,@body)))
 
-(defmacro ensure-ok (form)
-  (with-gensyms (result)
-    `(let ((,result ,form))
-       (unless (= ,result cl-charms:ok)
-         (cerror "Ignore" "Something went wrong here")))))
-
 (defun/frame put-text canvas-frame (frame y x str &rest format-args)
   (with-slots (window) frame
     (ensure-ok (cl-charms:mvwaddstr window y x (apply #'format nil str format-args)))))
@@ -21,6 +15,10 @@
 (defun/frame put-char canvas-frame (frame y x c)
   (with-slots (window) frame
     (ensure-ok (cl-charms:mvwaddch window y x (char-code c)))))
+
+(defun/frame draw-box canvas-frame (frame)
+  (with-slots (window) frame
+    (ensure-ok (cl-charms:box window 0 0))))
 
 ;;; Text frame-specific
 
