@@ -89,7 +89,7 @@
 
 (defmethod render-self ((frame callback-frame))
   (with-slots (render window) frame
-    (cl-charms:wclear window)
+    (cl-charms:werase window)
     (when render
       (funcall render))))
 
