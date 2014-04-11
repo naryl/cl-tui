@@ -13,4 +13,5 @@
     :depends-on (cl-charms
                  let+
                  alexandria
-                 anaphora))
+                 anaphora
+                 osicat))

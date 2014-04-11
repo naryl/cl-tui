@@ -32,50 +32,40 @@ Secondary value is the state of alt key. CL-TUI tries its best to portably guess
 and when alt+smth keys were pressed but seems like ncurses still returns garbage for
 alt+function (i.e. all non-printable) keys.
 
-Tertiary value is the state of ctrl key. If it's T then primary should be a lowercase
-ascii code.
-
-Shift key is reported by making the primary value uppercase and only if ctrl was not held
-otherwise it's ignored (blame legacy terminals).
-
-Also note that RETURN is reported as ^j and TAB as ^i."
+Ctrl and Shift keys modify the primary value.
+Ctrl+anything generates a non-printable character.
+Shift key is reported by making the primary value uppercase. Ctrl+Shift can't be detected
+at all."
   (when *need-resize*
     (setf *need-resize* nil)
     (ncurses-resize))
   ;; Using SETF instead of LET because sigwinch handler doesn't see the dynamic binding
   (setf *in-getch* t)
   (let ((key (cl-charms:wget-wch cl-charms:*stdscr*))
-        ctrl)
+        (alt nil))
     (setf *in-getch* nil)
-    (when (eq key :error)                 ; No input in non-blocking mode
-      (return-from read-key (values nil nil nil)))
-    (when (key-ctrl-p key)
-      (setf ctrl t)
-      (setf key (ctrl-key-key key)))
-    (let ((char (cond ((equal (keyname key) "KEY_RESIZE") ; Ignore key_resize completely
-                       (read-key))
-                      ((key-esc-p key)
-                       (if (detect-alt-sequence key)
-                           (return-from read-key (read-key-with-alt))
-                           :esc))
-                      ((key-function-p key)
-                       (key-keyword key))
-                      (t                  ; Simple characters including unicode
-                       (code-char key)))))
-      (values char nil ctrl))))
+    (if (eq key :error) ; No input in non-blocking mode
+        (values nil nil)
+        (let ((char (cond ((equal (keyname key) "KEY_RESIZE") ; Ignore key_resize completely
+                           (read-key))
+                          ((key-esc-p key)
+                           (cond ((detect-alt-sequence key)
+                                  (setf alt t)
+                                  (read-key))
+                                 (t
+                                  :esc)))
+                          ((key-function-p key)
+                           (key-keyword key))
+                          (t                  ; Simple characters including unicode
+                           (code-char key)))))
+          (values char alt)))))
 
 (defun key-function-p (key)
-  (<= 256 key 633))
+  (<= 256 key #.(parse-integer (format nil "~A" cl-charms:key_event)
+                               :radix 8)))
 
 (defun key-esc-p (key)
   (= key 27))
-
-(defun key-ctrl-p (key)
-  (and (<= 0 key 31)
-       (not (= key 27))))
-
-(defun ctrl-key-key (key)
-  (char-code (char-downcase (elt (keyname key) 1))))
 
 (defun detect-alt-sequence (key)
   "Returns T if it's an ALT-sequence for the next key and NIL if it's a standalone ESC"
@@ -86,10 +76,6 @@ Also note that RETURN is reported as ^j and TAB as ^i."
       (:error nil)
       (t (cl-charms:unget-wch next-key)
          t))))
-
-(defun read-key-with-alt ()
-  (let+ (((:values char _alt ctrl) (read-key)))
-    (values char t ctrl)))
 
 (defun keyname (key)
   (cffi:foreign-string-to-lisp (cl-charms:keyname key)))

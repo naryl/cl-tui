@@ -32,6 +32,7 @@
 * [.] Drawing functions
  * [ ] Used for drawing text
  * [X] Colors
+ * [ ] Fix colors reinitialization using objects
  * [ ] Used by retained frame and callback frame
  * [ ] Cell buffer manipulation functions
 * [ ] Predictable behaviour on screen reinit with colors
@@ -41,3 +42,4 @@
  * [X] ^^^^ and even make a hack for blocking io
 * [X] Don't REFRESH frames which are currently not displayed.
 * [ ] Optionally display debugger with restarts in a special frame
+* [ ] Find a way to make SIGWINCH handler work in more implementations.

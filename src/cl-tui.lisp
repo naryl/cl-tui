@@ -8,6 +8,8 @@
   (when *running*
     (error "Screen is already initialized"))
   (setf *running* t)
+  (sunless (osicat:environment-variable "ESCDELAY")
+    (setf it "25"))
   (cl-charms:initscr)
   (sunless *non-blocking-window*
     (setf it (cl-charms:newwin 1 1 0 0))
