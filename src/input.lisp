@@ -28,13 +28,13 @@ Primary is the pressed key as a CL character or a keyword if it's a special key.
 
 Secondary is the state of alt key if INIT-SCREEN was called with :META and your terminal
 supports it. Among popular ones xterm does and rxvt doesn't. Otherwise alt will be
-reported as a preceding :ESC keypress
+reported as a preceding :ESC keypress.
 
 Tertiary value is the state of ctrl key. If it's T then primary should be a lowercase
 ascii among 32-63 codes.
 
 Shift key is reported by making the primary value uppercase and only if ctrl was not held
-otherwise it's ignored (blame legacy terminals)"
+otherwise it's ignored (blame legacy terminals)."
   (when *need-resize*
     (setf *need-resize* nil)
     (ncurses-resize))
@@ -52,18 +52,25 @@ otherwise it's ignored (blame legacy terminals)"
       (setf key (char-code
                  (char-downcase
                   (elt (keyname key) 1)))))
-    (let ((char (cond ((equal (keyname key)
-                              "KEY_RESIZE") ; Ignore key_resize completely
+    (let ((char (cond ((equal (keyname key) "KEY_RESIZE") ; Ignore key_resize completely
                        (read-key))
-                      ((eql key 27)
+                      ((= key 27)         ; Report code 27 as a nice keyword
                        :ESC)
-                      ((<= 256 key 633) ; ncurses special key constants
-                       (make-keyword (keyname key)))
-                      (t (code-char key))))) ; Simple character
+                      ((<= 256 key 633)   ; Ncurses function keys
+                       (key-keyword key))
+                      (t                  ; Simple characters including unicode
+                       (code-char key)))))
       (values char alt ctrl))))
 
 (defun keyname (key)
   (cffi:foreign-string-to-lisp (cl-charms:keyname key)))
+
+(defun key-keyword (key)
+  (make-keyword (map 'string (lambda (c)
+                               (case c
+                                 (#\_ #\-)
+                                 (t c)))
+                     (keyname key))))
 
 (defun ncurses-resize ()
   (cl-charms:endwin)
