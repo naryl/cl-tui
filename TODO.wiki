@@ -35,7 +35,9 @@
  * [ ] Used by retained frame and callback frame
  * [ ] Cell buffer manipulation functions
 * [ ] Predictable behaviour on screen reinit with colors
-* [ ] Input handling
- * [ ] What exactly?
+* [o] Input handling
+ * [X] Detecting ctrl
+ * [X] Detect alt using meta(TRUE)
+ * [ ] Try to detect alt if and INIT-SCREEN asked for non-blocking io
 * [X] Don't REFRESH frames which are currently not displayed.
 * [ ] Optionally display debugger with restarts in a special frame

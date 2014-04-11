@@ -10,11 +10,14 @@ It's currently in development and not intended for general use.
 
 Initializes the ncurses screen with the specified attributes.
 
-* :echo/:noecho - echo input characters to screen
-* :raw/:noraw - send keypresses without any processing
-* :cbreak/:nocbreak - disable line buffering (disabled automatically if :raw)
-* :cursor/:nocursor - show input cursor
-* :colors - initialize colors system
+* :echo/:noecho - Echo input characters to screen
+* :raw/:noraw - Send keypresses without any processing
+* :cbreak/:nocbreak - Disable or enable line buffering (disabled automatically if :raw)
+* :cursor/:nocursor - Show or hide input cursor
+* :delay/:nodelay - Blocking or non-blocking input
+* :keypad/:nokeypad - Detect system keys and report them using keywords instead of :ESC-sequences
+* :meta/:nometa - Detect and report alt with read-key's third value. (NOT RECOMMENDED, NOT PORTABLE)
+* :colors - Initialize colors system
 
 Note that calling init-screen or with-screen several times in the same image may or may not break something.
 
