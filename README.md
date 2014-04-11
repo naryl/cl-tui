@@ -16,8 +16,9 @@ Initializes the ncurses screen with the specified attributes.
 * :cursor/:nocursor - Show or hide input cursor
 * :delay/:nodelay - Blocking or non-blocking input
 * :keypad/:nokeypad - Detect system keys and report them using keywords instead of :ESC-sequences
-* :meta/:nometa - Detect and report alt with read-key's third value. (NOT RECOMMENDED, NOT PORTABLE)
 * :colors - Initialize colors system
+
+Default are (:raw :noecho :keypad :nocursor :delay). Override with opposite arguments as needed.
 
 Note that calling init-screen or with-screen several times in the same image may or may not break something.
 

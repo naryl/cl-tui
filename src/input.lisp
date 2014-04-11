@@ -21,46 +21,75 @@
 #+sbcl
 (sb-sys:enable-interrupt sb-posix:sigwinch #'sigwinch-handler)
 
+(defvar *non-blocking-window* nil)
+
 (defun read-key ()
   "Returns three values indicating the pressed keys.
 
 Primary is the pressed key as a CL character or a keyword if it's a special key.
 
-Secondary is the state of alt key if INIT-SCREEN was called with :META and your terminal
-supports it. Among popular ones xterm does and rxvt doesn't. Otherwise alt will be
-reported as a preceding :ESC keypress.
+Secondary value is the state of alt key. CL-TUI tries its best to portably guess when ESC
+and when alt+smth keys were pressed but seems like ncurses still returns garbage for
+alt+function (i.e. all non-printable) keys.
 
 Tertiary value is the state of ctrl key. If it's T then primary should be a lowercase
-ascii among 32-63 codes.
+ascii code.
 
 Shift key is reported by making the primary value uppercase and only if ctrl was not held
-otherwise it's ignored (blame legacy terminals)."
+otherwise it's ignored (blame legacy terminals).
+
+Also note that RETURN is reported as ^j and TAB as ^i."
   (when *need-resize*
     (setf *need-resize* nil)
     (ncurses-resize))
   ;; Using SETF instead of LET because sigwinch handler doesn't see the dynamic binding
   (setf *in-getch* t)
-  (let ((key (cl-charms:get-wch))
-        alt ctrl)
+  (let ((key (cl-charms:wget-wch cl-charms:*stdscr*))
+        ctrl)
     (setf *in-getch* nil)
-    (when (<= 128 key 255) ; Detect alt with meta(TRUE)
-      (setf alt t)
-      (incf key -128))
-    (when (and (<= 0 key 31) ; Detect ctrl
-               (not (= key 27)))
+    (when (eq key :error)                 ; No input in non-blocking mode
+      (return-from read-key (values nil nil nil)))
+    (when (key-ctrl-p key)
       (setf ctrl t)
-      (setf key (char-code
-                 (char-downcase
-                  (elt (keyname key) 1)))))
+      (setf key (ctrl-key-key key)))
     (let ((char (cond ((equal (keyname key) "KEY_RESIZE") ; Ignore key_resize completely
                        (read-key))
-                      ((= key 27)         ; Report code 27 as a nice keyword
-                       :ESC)
-                      ((<= 256 key 633)   ; Ncurses function keys
+                      ((key-esc-p key)
+                       (if (detect-alt-sequence key)
+                           (return-from read-key (read-key-with-alt))
+                           :esc))
+                      ((key-function-p key)
                        (key-keyword key))
                       (t                  ; Simple characters including unicode
                        (code-char key)))))
-      (values char alt ctrl))))
+      (values char nil ctrl))))
+
+(defun key-function-p (key)
+  (<= 256 key 633))
+
+(defun key-esc-p (key)
+  (= key 27))
+
+(defun key-ctrl-p (key)
+  (and (<= 0 key 31)
+       (not (= key 27))))
+
+(defun ctrl-key-key (key)
+  (char-code (char-downcase (elt (keyname key) 1))))
+
+(defun detect-alt-sequence (key)
+  "Returns T if it's an ALT-sequence for the next key and NIL if it's a standalone ESC"
+  (let ((next-key (cl-charms:wget-wch *non-blocking-window*)))
+    (case next-key
+      (27 (cl-charms:unget-wch next-key)
+          nil)
+      (:error nil)
+      (t (cl-charms:unget-wch next-key)
+         t))))
+
+(defun read-key-with-alt ()
+  (let+ (((:values char _alt ctrl) (read-key)))
+    (values char t ctrl)))
 
 (defun keyname (key)
   (cffi:foreign-string-to-lisp (cl-charms:keyname key)))
