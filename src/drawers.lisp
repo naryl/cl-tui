@@ -109,8 +109,8 @@ they're disabled."
             (make-instance 'color-pair :fg fg :bg bg))))
 
 (defun clear-colors ()
-  (setf *used-color-pairs* nil
-        *used-colors* nil)
+  (setf *used-color-pairs* -1
+        *used-colors* -1)
   (dolist (obj (append *colors* *color-pairs*))
     (setf (slot-value obj 'id) nil)))
 
