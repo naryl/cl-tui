@@ -19,10 +19,9 @@
 
            ; Common drawing routines
            #:with-attributes
-           #:make-color
-           #:free-color
-           #:make-color-pair
-           #:free-color-pair
+           #:color
+           #:color-pair
+           #:clear-colors
 
            ; Containers
            #:container-frame

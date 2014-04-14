@@ -87,11 +87,15 @@
 (defgeneric add-child (parent child &rest placement)
   (:documentation "Add a child to a container frame")
   (:method ((parent symbol) child &rest placement)
+    (unless child
+      (error "Child is nil"))
     (apply #'add-child (frame parent) child placement)))
 
 (defgeneric remove-child (parent child)
   (:documentation "Remove a child from a container frame")
   (:method ((parent symbol) child)
+    (unless child
+      (error "Child is nil"))
     (remove-child (frame parent) child)))
 
 (defun get-screen-size ()

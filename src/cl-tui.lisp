@@ -56,9 +56,7 @@ deinitialized after `body' is executed (or reaised error)."
 
 (defun init-color ()
   (cond ((= (cl-charms:has-colors) 1)
-         (cl-charms:start-color)
-         (setf *used-colors* (list 0))
-         (setf *used-color-pairs* (list 0 1 2 3 4 5 6 7)))
+         (cl-charms:start-color))
         (t
          (error "Your terminal doesn't support color"))))
 

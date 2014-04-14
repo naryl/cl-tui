@@ -55,20 +55,8 @@
            (:altcharset cl-charms:a_altcharset)))
         ((and (listp attribute) ; Color
               (eq (first attribute) :color)
-              (integerp (second attribute)))
-         (let ((color (second attribute)))
-           (cond ((keywordp color) ; Default color
-                  (ecase color
-                    (:black cl-charms:COLOR_BLACK)
-                    (:red cl-charms:COLOR_RED)
-                    (:green cl-charms:COLOR_GREEN)
-                    (:yellow cl-charms:COLOR_YELLOW)
-                    (:blue cl-charms:COLOR_BLUE)
-                    (:magenta cl-charms:COLOR_MAGENTA)
-                    (:cyan cl-charms:COLOR_CYAN)
-                    (:white cl-charms:COLOR_WHITE)))
-                 ((integerp color) ; Custom color
-                  (cl-charms:color-pair color)))))
+              (typep (second attribute) 'color-pair))
+         (cl-charms:color-pair (ensure-color-pair (second attribute))))
         (t (error "Unknown attribute ~S" attribute))))
 
 (defun attributes-to-code (&rest attributes)
@@ -91,43 +79,52 @@ they're disabled."
               ,@body)
          (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-code)))))
 
-(defvar *used-color-pairs* (list 0) "Sorted list of used color pairs")
-(defvar *used-colors* (list 0 1 2 3 4 5 6 7) "Sorted list of used colors")
+;;;; Colors
 
-(eval-when (:execute :compile-toplevel :load-toplevel)
-  (defmacro take-id (var)
-    `(let ((id (loop
-                  :for tail :on ,var
-                  :do (when (null (cdr tail))
-                        (return (1+ (first tail))))
-                  :do (when (/= 1 (- (second tail) (first tail)))
-                        (return (1+ (first tail)))))))
-       (push id ,var)
-       (setf ,var (sort ,var #'<))
-       id)))
+(defvar *used-color-pairs* -1 "ID of the last used color-pair -1 if none")
+(defvar *used-colors* -1 "ID of the last used color -1 if none")
 
-(defun make-color (r g b)
-  (let ((free-id (take-id *used-colors*)))
-    (when-running
-      (unless (zerop (cl-charms:init-color free-id r g b))
-        (error "Looks like you've reached the limit of ~S colors" free-id)))
-    free-id))
+(defclass color ()
+    ((r :initarg :r :type (integer 0 1000))
+     (g :initarg :g :type (integer 0 1000))
+     (b :initarg :b :type (integer 0 1000))
+     (id :initform nil :type (or null fixnum))))
 
-(defun free-color (color)
-  (if (< color 8)
-      (error "Can't delete a default color")
-      (deletef *used-colors* color))
-  nil)
+(defclass color-pair ()
+  ((fg :initarg :fg :type fixnum)
+   (bg :initarg :bg :type fixnum)
+   (id :initform nil :type (or null fixnum))))
 
-(defun make-color-pair (fg bg)
-  (let ((free-id (take-id *used-color-pairs*)))
-    (when-running
-      (unless (zerop (cl-charms:init-pair free-id fg bg))
-        (error "Looks like you've reached the limit of ~S color pairs" free-id)))
-    free-id))
+(defvar *color-pairs* (make-hash-table :test #'equal))
+(defvar *colors* (make-hash-table :test #'equal))
 
-(defun free-color-pair (pair)
-  (if (zerop pair)
-      (error "Can't free the default color pair")
-      (deletef *used-color-pairs* pair))
-  nil)
+(defun color (r g b)
+  (or (gethash (list r g b) *colors*)
+      (setf (gethash (list r g b) *colors*)
+            (make-instance 'color :r r :g g :b b))))
+
+(defun color-pair (fg bg)
+  (or (gethash (list fg bg) *color-pairs*)
+      (setf (gethash (list fg bg) *color-pairs*)
+            (make-instance 'color-pair :fg fg :bg bg))))
+
+(defun clear-colors ()
+  (setf *used-color-pairs* nil
+        *used-colors* nil)
+  (dolist (obj (append *colors* *color-pairs*))
+    (setf (slot-value obj 'id) nil)))
+
+(defun ensure-color (color)
+  (with-slots (id r g b) color
+    (unless id
+      (setf id (incf *used-colors*))
+      (cl-charms:init-color id r g b))
+    id))
+
+(defun ensure-color-pair (pair)
+  (with-slots (id fg bg) pair
+    (unless id
+      (setf id (incf *used-colors*))
+      (let ((colors (mapcar #'ensure-color (list fg bg))))
+        (apply #'cl-charms:init-pair id colors)))
+    id))
