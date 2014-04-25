@@ -8,13 +8,14 @@
  * [o] Frame hierarchy and relative placement
   * [X] Single cell
   * [X] Properly redefining frames
-  * [ ] Proper hierarchy resizing
+  * [X] Proper hierarchy resizing
   * [ ] Horizontal-vertical layout
   * [ ] Min-max-weight for layouts
   * [ ] Tabbed layout
  * [X] Windows with borders
 * [X] Examples
   * [X] Example for multiple "scenes" and (DISPLAY 'non-root)
+  * [X] Example for log frame
 * [o] Diffrent frame types
  * [X] Frame that remembers what was drawn on it (like ncurses default)
  * [o] Frame rendering on callback
@@ -23,21 +24,24 @@
  * [ ] Frame rendering a cell buffer
   * [ ] Frame class
   * [ ] ncurses pad-like functionality
- * [.] Frame rendering text
+ * [o] Frame rendering text
   * [X] Frame class
   * [ ] Auto line wrap
   * [ ] Scrolling text
-  * [ ] Merging equal lines
-  * [ ] Configurable (lambda?) timestamps
-* [.] Drawing functions
+  * [X] Merging equal lines
+  * [ ] Colors
+  * [X] Configurable (lambda?) timestamps
+* [o] Drawing functions
  * [ ] Used for drawing text
  * [X] Colors
- * [ ] Fix colors reinitialization using objects
+ * [X] Fix colors reinitialization using objects
  * [ ] Used by retained frame and callback frame
  * [ ] Cell buffer manipulation functions
-* [ ] Predictable behaviour on screen reinit with colors
+* [o] Predictable behaviour on screen reinit with colors
+ * [X] Do it 
+ * [ ] Test it
 * [X] Input handling
- * [X] Detecting ctrl
+ * [X] Detecting ctrl (not)
  * [X] Try to detect alt if INIT-SCREEN asked for non-blocking io
  * [X] ^^^^ and even make a hack for blocking io
 * [X] Don't REFRESH frames which are currently not displayed.

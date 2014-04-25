@@ -76,7 +76,7 @@
   ((render :type function
            :initform nil)))
 
-(defmethod initialize-instance ((frame callback-frame) &key name render)
+(defmethod initialize-instance ((frame callback-frame) &key name render &allow-other-keys)
   (call-next-method)
   (when render
     (setf (slot-value frame 'render)
@@ -93,15 +93,46 @@
     (when render
       (funcall render))))
 
-;;; Text frame
+;;; Log frame
 
-(defclass text-frame (frame)
-  ((text :type string
-         :initform "")))
+(defclass log-frame (frame)
+  ((text :type list
+         :initform nil)
+   (line-render :type function
+                :initarg :line-render
+                :initform #'log-default-line-render)))
 
-(defmethod render-self ((frame text-frame))
-  (with-slots (window text) frame
-    (cl-charms:wclear (slot-value window 'window))
-    (loop :for i :from 0
-       :for line :in text
-       :do (cl-charms:mvwaddstr window i 0 text))))
+(defmethod frame-drawable-p ((frame log-frame))
+  t)
+
+(defstruct log-line
+  (text "" :type string)
+  (ts (get-universal-time) :type integer)
+  (count 1 :type fixnum)
+  (color nil))
+
+(defun log-default-line-render (text &key ts count)
+  (let+ (((:values sec min hour) (decode-universal-time ts)))
+    (format nil "~A:~A:~A ~A~A"
+            hour min sec
+            text
+            (if (> count 1)
+                (format nil " [~A]" count)
+                ""))))
+
+(defmethod render-self ((frame log-frame))
+  (with-slots (window text line-render) frame
+    (flet ((put-line (i line)
+             (cl-charms:mvwaddstr window i 0 (funcall line-render
+                                                      (log-line-text line)
+                                                      :ts (log-line-ts line)
+                                                      :count (log-line-count line)
+                                                      :color (log-line-color line)
+                                                      :allow-other-keys t))))
+      (cl-charms:wclear window)
+      (loop :for i :from 0
+         :for line :in text
+         :do (aif (log-line-color line)
+                  (with-attributes ((:color it)) window
+                    (put-line i line))
+                  (put-line i line))))))

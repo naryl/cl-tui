@@ -33,8 +33,8 @@
            #:put-char
            #:put-text
 
-           ; Text frame
-           #:text-frame
+           ; Log frame
+           #:log-frame
            #:append-line
            #:append-text
            #:clear
