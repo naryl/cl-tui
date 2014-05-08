@@ -22,13 +22,15 @@
 
 ;;; Log frame-specific
 
-(defun/frame append-line log-frame (frame new-line)
+(defun/frame append-line log-frame (frame str &rest format-args)
   (with-slots (text) frame
-    (let ((last-line (lastcar text)))
+    (let ((last-line (car text))
+          (new-line (apply #'format nil str format-args)))
       (if (and last-line
                (string= new-line (log-line-text last-line)))
           (incf (log-line-count last-line))
-          (appendf text (list (make-log-line :text new-line)))))))
+          (push (make-log-line :text new-line :attrs *current-attributes*) text))
+      nil)))
 
 ;;; Common stuff
 

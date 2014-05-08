@@ -109,30 +109,29 @@
   (text "" :type string)
   (ts (get-universal-time) :type integer)
   (count 1 :type fixnum)
-  (color nil))
+  (attrs nil :type list))
 
 (defun log-default-line-render (text &key ts count)
   (let+ (((:values sec min hour) (decode-universal-time ts)))
-    (format nil "~A:~A:~A ~A~A"
+    (format nil "~2,'0D:~2,'0D:~2,'0D ~A~A"
             hour min sec
             text
             (if (> count 1)
-                (format nil " [~A]" count)
+                (format nil " x~A" count)
                 ""))))
 
 (defmethod render-self ((frame log-frame))
-  (with-slots (window text line-render) frame
+  (with-slots (window text line-render h) frame
     (flet ((put-line (i line)
-             (cl-charms:mvwaddstr window i 0 (funcall line-render
-                                                      (log-line-text line)
-                                                      :ts (log-line-ts line)
-                                                      :count (log-line-count line)
-                                                      :color (log-line-color line)
-                                                      :allow-other-keys t))))
-      (cl-charms:wclear window)
-      (loop :for i :from 0
+             (cl-charms:mvwaddstr window
+                                  i 0
+                                  (funcall line-render
+                                           (log-line-text line)
+                                           :ts (log-line-ts line)
+                                           :count (log-line-count line)
+                                           :allow-other-keys t))))
+      (cl-charms:werase window)
+      (loop :for i :from (- h 1) :downto 0
          :for line :in text
-         :do (aif (log-line-color line)
-                  (with-attributes ((:color it)) window
-                    (put-line i line))
-                  (put-line i line))))))
+         :do (with-processed-attributes (log-line-attrs line) frame
+               (put-line i line))))))

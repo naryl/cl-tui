@@ -6,6 +6,7 @@
  * [X] Display frame on screen
  * [X] Redraw on window size change
  * [o] Frame hierarchy and relative placement
+  * [ ] Padding
   * [X] Single cell
   * [X] Properly redefining frames
   * [X] Proper hierarchy resizing
@@ -24,12 +25,12 @@
  * [ ] Frame rendering a cell buffer
   * [ ] Frame class
   * [ ] ncurses pad-like functionality
- * [o] Frame rendering text
+ * [O] Frame rendering text
   * [X] Frame class
   * [ ] Auto line wrap
-  * [ ] Scrolling text
+  * [X] Scrolling text
   * [X] Merging equal lines
-  * [ ] Colors
+  * [X] Colors
   * [X] Configurable (lambda?) timestamps
 * [o] Drawing functions
  * [ ] Used for drawing text

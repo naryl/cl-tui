@@ -54,8 +54,10 @@
     nil))
 
 (defun frame (name)
-  (when name
-    (get name 'frame)))
+  (etypecase name
+    (null nil)
+    (frame name)
+    (symbol (get name 'frame))))
 
 (defsetf frame (name) (value)
   `(setf (get ,name 'frame) ,value))
@@ -159,6 +161,8 @@ Default FRAME is the whole screen."
 
 ;;; Common stuff
 
+(defvar *current-attributes* nil)
+
 (defun get-attribute-name-from-keyword (attribute)
   "Converts keyword to ncurses attribute."
   (cond ((keywordp attribute) ; Simple attribute
@@ -174,35 +178,48 @@ Default FRAME is the whole screen."
            (:invis cl-charms:a_invis)
            (:altcharset cl-charms:a_altcharset)))
         ((and (listp attribute) ; Color
-              (eq (first attribute) :color)
-              (typep (second attribute) 'color-pair))
-         (cl-charms:color-pair (ensure-color-pair (second attribute))))
+              (eq (first attribute) :color))
+         (let ((pair (cond
+                       ((and (= 2 (length attribute))
+                             (typep (second attribute) 'color-pair))
+                        (second attribute))
+                       ((and (= 3 (length attribute))
+                             (typep (second attribute) 'color)
+                             (typep (third attribute) 'color))
+                        (apply #'color-pair (cdr attribute))))))
+           (cl-charms:color-pair (ensure-color-pair pair))))
         (t (error "Unknown attribute ~S" attribute))))
 
-(defun attributes-to-code (&rest attributes)
+(defun attributes-to-code (attributes)
   (let ((attribute-codes (mapcar #'get-attribute-name-from-keyword attributes)))
     (apply #'logior attribute-codes)))
 
 (defmacro with-attributes ((&body attributes) frame &body body)
   "Enables given attributes, executes body and then ensures
 they're disabled."
-  (with-gensyms (attributes-code)
-    `(let ((,attributes-code (attributes-to-code
-                              ,@(mapcar (lambda (attr)
-                                          (typecase attr
-                                            (symbol attr)
-                                            (list `(list ,@attr))))
-                                        attributes))))
-       (unwind-protect
-            (progn
-              (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-code)
-              ,@body)
-         (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-code)))))
+  (with-gensyms (processed-attributes)
+    `(let ((,processed-attributes
+            (list ,@(mapcar (lambda (attr)
+                              (typecase attr
+                                (symbol attr)
+                                (list `(list ,@attr))))
+                            attributes))))
+      (with-processed-attributes ,processed-attributes ,frame ,@body))))
+
+(defmacro with-processed-attributes (processed-attributes frame &body body)
+  (once-only (processed-attributes)
+    (with-gensyms (attributes-code)
+      `(let ((,attributes-code (attributes-to-code ,processed-attributes)))
+         (unwind-protect
+              (let ((*current-attributes* ,processed-attributes))
+                (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-code)
+                ,@body)
+           (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-code))))))
 
 ;;;; Colors
 
-(defvar *used-color-pairs* -1 "ID of the last used color-pair -1 if none")
-(defvar *used-colors* -1 "ID of the last used color -1 if none")
+(defvar *used-color-pairs* 0 "ID of the last used color-pair 0 if none")
+(defvar *used-colors* 0 "ID of the last used color 0 if none")
 
 (defclass color ()
     ((r :initarg :r :type (integer 0 1000))
@@ -229,9 +246,10 @@ they're disabled."
             (make-instance 'color-pair :fg fg :bg bg))))
 
 (defun clear-colors ()
-  (setf *used-color-pairs* -1
-        *used-colors* -1)
-  (dolist (obj (append *colors* *color-pairs*))
+  (setf *used-color-pairs* 0
+        *used-colors* 0)
+  (dolist (obj (append (hash-table-values *colors*)
+                       (hash-table-values *color-pairs*)))
     (setf (slot-value obj 'id) nil)))
 
 (defun ensure-color (color)
