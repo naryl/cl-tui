@@ -3,7 +3,8 @@
   (:use :cl
         :let+
         :alexandria
-        :anaphora)
+        :anaphora
+        :split-sequence)
   (:export #:init-screen
            #:destroy-screen
            #:with-screen

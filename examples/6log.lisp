@@ -10,7 +10,9 @@
   (with-screen (:colors)
     (with-attributes ((:color (color 0 600 600) (color 800 800 0)))
         'log
-      (append-line 'log "Press C-q to quit"))
+      (append-line 'log "Press C-q to quit")
+      (append-line 'log "A very long line: ~{~A~^ ~}" (make-list 40 :initial-element "asdf"))
+      (append-line 'log "A very long word: ~A" (make-array 200 :initial-element #\x :element-type 'base-char)))
     (with-attributes ((:color (color 0 1000 0) (color 0 0 0)))
         'log
       (loop

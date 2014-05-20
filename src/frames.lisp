@@ -120,18 +120,53 @@
                 (format nil " x~A" count)
                 ""))))
 
+(defun split-line (text width)
+  (if (<= (length text) width)
+      (list text)
+      (let ((words (split-sequence #\Space text))
+            (result nil)
+            (current-line ""))
+        (dolist (next-word words)
+          (when (and (> (+ (length current-line) (length next-word) 1)
+                        width)
+                     (not (and (> (length next-word)) width
+                               (string= current-line ""))))
+            (push current-line result)
+            (setf current-line ""))
+          (setf current-line (concatenate 'string
+                                          current-line
+                                          (if (string= current-line "") "" " ")
+                                          next-word)))
+        (unless (string= current-line "")
+          (push current-line result))
+        (mapcan (lambda (line)
+                  (if (> (length line) width)
+                      (loop
+                         :with length := (length line)
+                         :for start :from 0 :by width :below length
+                         :collecting (subseq line start (min length (+ start width))))
+                      (list line)))
+                (nreverse result)))))
+
+(defun put-log-line (frame text line)
+  (with-slots (w h line-render window) frame
+    (let* ((rendered-text (funcall (slot-value frame 'line-render)
+                                  (log-line-text text)
+                                  :ts (log-line-ts text)
+                                  :count (log-line-count text)
+                                  :allow-other-keys t))
+           (split-lines (split-line rendered-text w)))
+      (with-processed-attributes (log-line-attrs text) frame
+        (loop :for offset :from (length split-lines) :downto 1
+           :for text-line :in split-lines
+           :do (cl-charms:mvwaddstr window (- h line offset) 0 text-line)))
+      (length split-lines))))
+
 (defmethod render-self ((frame log-frame))
-  (with-slots (window text line-render h) frame
-    (flet ((put-line (i line)
-             (cl-charms:mvwaddstr window
-                                  i 0
-                                  (funcall line-render
-                                           (log-line-text line)
-                                           :ts (log-line-ts line)
-                                           :count (log-line-count line)
-                                           :allow-other-keys t))))
-      (cl-charms:werase window)
-      (loop :for i :from (- h 1) :downto 0
-         :for line :in text
-         :do (with-processed-attributes (log-line-attrs line) frame
-               (put-line i line))))))
+  (with-slots (window text h) frame
+    (cl-charms:werase window)
+    (let ((i 0))
+      (dolist (line text)
+        (incf i (put-log-line frame line i))
+        (when (>= i h)
+          (return-from render-self))))))

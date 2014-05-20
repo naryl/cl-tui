@@ -25,9 +25,9 @@
  * [ ] Frame rendering a cell buffer
   * [ ] Frame class
   * [ ] ncurses pad-like functionality
- * [O] Frame rendering text
+ * [X] Frame rendering text
   * [X] Frame class
-  * [ ] Auto line wrap
+  * [X] Auto line wrap
   * [X] Scrolling text
   * [X] Merging equal lines
   * [X] Colors
