@@ -32,12 +32,7 @@
   * [X] Merging equal lines
   * [X] Colors
   * [X] Configurable (lambda?) timestamps
-* [o] Drawing functions
- * [ ] Used for drawing text
- * [X] Colors
- * [X] Fix colors reinitialization using objects
- * [ ] Used by retained frame and callback frame
- * [ ] Cell buffer manipulation functions
+* [X] Colors
 * [o] Predictable behaviour on screen reinit with colors
  * [X] Do it 
  * [ ] Test it

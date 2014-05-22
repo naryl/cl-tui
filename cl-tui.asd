@@ -15,5 +15,4 @@
                  alexandria
                  anaphora
                  split-sequence
-                 cl-ppcre
                  osicat))
