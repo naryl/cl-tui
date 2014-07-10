@@ -30,7 +30,7 @@
                (string= new-line (log-line-text last-line)))
           (incf (log-line-count last-line))
           (push (make-log-line :text new-line :attrs *current-attributes*) text))
-      nil)))
+      new-line)))
 
 ;;; Common stuff
 

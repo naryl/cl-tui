@@ -112,7 +112,7 @@
 (defun frame-size (&optional frame)
   "Returns the frame (Y X) size in characters. Or NIL if it's unknown yet.
 Default FRAME is the whole screen."
-  (if (not frame)
+  (if (null frame)
     (get-screen-size)
     (list (slot-value frame 'h)
           (slot-value frame 'w))))
@@ -120,7 +120,7 @@ Default FRAME is the whole screen."
 (defun is-frame-displayed (frame)
   (cond ((eq frame *display*)
          t)
-        ((eq frame nil)
+        ((null frame)
          nil)
         (t
          (is-frame-displayed (slot-value (frame frame) 'parent)))))
@@ -137,10 +137,10 @@ Default FRAME is the whole screen."
          (cl-charms:doupdate))
         (t (cerror "Ignore" "Attempt to refresh a frame ~S which is not a child of current root ~S"
                    frame *display*)))
-  nil)
+  (values))
 
 (defgeneric render-self (frame)
-  (:documentation "Displays the frame on screen. FRAME is the object here. Not the name.")
+  (:documentation "Displays the frame on screen.")
   (:method ((frame frame))
     nil)
   (:method ((name symbol))

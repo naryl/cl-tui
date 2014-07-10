@@ -9,7 +9,7 @@
        (if *running*
            (,func)
            (push #',func *delayed-init*))
-       nil)))
+       (values))))
 
 (defun do-delayed-init ()
   (mapc #'funcall (nreverse *delayed-init*))

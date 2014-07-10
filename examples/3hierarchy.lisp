@@ -5,11 +5,11 @@
 
 (in-package cl-tui.examples)
 
-(defun main-render2 (&key h w)
-  (put-char 'callback2 2 2 #\+)
-  (put-char 'callback2 2 (- w 3) #\+)
-  (put-char 'callback2 (- h 3) 2 #\+)
-  (put-char 'callback2 (- h 3) (- w 3) #\+))
+(defun main-render2 (&key frame h w)
+  (put-char frame 2 2 #\+)
+  (put-char frame 2 (- w 3) #\+)
+  (put-char frame (- h 3) 2 #\+)
+  (put-char frame (- h 3) (- w 3) #\+))
 
 (define-frame callback (container-frame) :on :root)
 
