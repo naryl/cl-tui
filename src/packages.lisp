@@ -40,6 +40,13 @@
            #:append-text
            #:clear
 
+           ;; Tabbed frame
+           #:tabbed-frame
+           #:tabs-list
+           #:tab-forward
+           #:tab-backwards
+           #:draw-tab-bar
+
            ; Input
            #:read-key
    ))

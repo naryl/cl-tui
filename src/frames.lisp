@@ -170,3 +170,34 @@
         (incf i (put-log-line frame line i))
         (when (>= i h)
           (return-from render-self))))))
+
+;;; Tabbed frame
+
+(defclass tabbed-frame (container-frame)
+  ((current-frame-position :initform 0
+                           :initarg :initial-tab
+                           :documentation "Position of currently drawn children."
+                  ;; Position was chosed to simplify tab switch operation.
+                  ;; Now it can be done via simple modular addition.
+                  )
+   (current-frame :initform nil
+                  :documentation "Stores reference to currently displayed frame.")))
+
+(defmethod render-children ((frame tabbed-frame))
+  (unless (slot-value frame 'current-frame)
+    (with-slots (children current-frame current-frame-position) frame
+      (setf current-frame (car (nth (mod current-frame-position
+                                         (max 1 (length children)))
+                                    children)))))
+  (awhen (slot-value frame 'current-frame)
+    (render-frame it)))
+
+(defmethod calculate-layout ((frame tabbed-frame))
+  (dolist (child (slot-value frame 'children))
+    (with-slots (x y w h) (frame (car child))
+      (setf x (slot-value frame 'x)
+            y (slot-value frame 'y)
+            w (slot-value frame 'w)
+            h (slot-value frame 'h))
+      (show-window (car child) h w y x)
+      (calculate-layout (car child)))))
