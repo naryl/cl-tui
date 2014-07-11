@@ -21,16 +21,16 @@
   (color intensity intensity intensity))
 
 (defun main-render (&key)
-      (dotimes (i 36)
-        (with-attributes ((:color (elt rainbow-pairs (mod i 6)))) 'callback
-          (put-char 'callback 1 (1+ i) #\X)))
-      (dotimes (i 20)
-        (let* ((intensity (* 50 i))
-               (fg (gray (+ 50 intensity)))
-               (bg (gray intensity)))
-          (with-attributes ((:color (color-pair fg bg))) 'callback
-            (dotimes (j 3)
-              (put-char 'callback (+ 2 j) (1+ i) #\X))))))
+  (dotimes (i 36)
+    (with-attributes ((:color (elt rainbow-pairs (mod i 6)))) 'callback
+      (put-char 'callback 1 (1+ i) #\X)))
+  (dotimes (i 20)
+    (let* ((intensity (* 50 i))
+           (fg (gray (+ 50 intensity)))
+           (bg (gray intensity)))
+      (with-attributes ((:color (color-pair fg bg))) 'callback
+        (dotimes (j 3)
+          (put-char 'callback (+ 2 j) (1+ i) #\X))))))
 
 (define-frame callback (callback-frame :render 'main-render) :on :root)
 
