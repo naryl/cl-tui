@@ -63,7 +63,8 @@
   `(setf (get ,name 'frame) ,value))
 
 (defmacro define-frame (name (type &rest frame-args)
-                        &rest placement &key ((:on parent) nil))
+                        &rest placement &key ((:on parent) nil)
+                        &allow-other-keys)
   (remf placement :on)
   (when (eq parent t)
     (setf parent :root))
