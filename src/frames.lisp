@@ -11,6 +11,7 @@
   ((children :initform nil
              :documentation "Alist of frame names and any placement arguments.")
    (split-type :type (member :none :vertical :horizontal)
+               :initarg :split-type
                :initform :vertical)))
 
 (defmethod add-child ((frame container-frame) child &rest placement)
