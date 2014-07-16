@@ -37,7 +37,7 @@
 (defun/frame clear frame (frame)
   (etypecase frame
     (log-frame (setf (slot-value frame 'text) nil))
-    (canvas-frame (cl-charms:wclear (slot-value (slot-value frame 'window) 'window)))))
+    (canvas-frame (cl-charms:wclear (slot-value frame 'window)))))
 
 ;;; Tabs manupulations
 
