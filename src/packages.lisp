@@ -14,6 +14,7 @@
            #:refresh
 
            ; Frames
+           #:frame
            #:frame-size
            #:define-frame
            #:destroy-frame
