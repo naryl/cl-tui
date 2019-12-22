@@ -24,7 +24,7 @@
 (defvar *non-blocking-window* nil)
 
 (defun read-key ()
-  "Returns three values indicating the pressed keys.
+  "Returns two values indicating the pressed keys.
 
 Primary is the pressed key as a CL character or a keyword if it's a special key.
 
@@ -41,7 +41,7 @@ at all."
     (ncurses-resize))
   ;; Using SETF instead of LET because sigwinch handler doesn't see the dynamic binding
   (setf *in-getch* t)
-  (let ((key (cl-charms:wget-wch cl-charms:*stdscr*))
+  (let ((key (charms/ll:wget-wch charms/ll:*stdscr*))
         (alt nil))
     (setf *in-getch* nil)
     (if (eq key :error) ; No input in non-blocking mode
@@ -53,7 +53,7 @@ at all."
                                   (setf alt t)
                                   (read-key))
                                  (t
-                                  :esc)))
+                                  #\Esc)))
                           ((key-function-p key)
                            (key-keyword key))
                           (t                  ; Simple characters including unicode
@@ -61,7 +61,7 @@ at all."
           (values char alt)))))
 
 (defun key-function-p (key)
-  (<= 256 key #.(parse-integer (format nil "~A" cl-charms:key_event)
+  (<= 256 key #.(parse-integer (format nil "~A" charms/ll:key_event)
                                :radix 8)))
 
 (defun key-esc-p (key)
@@ -69,16 +69,16 @@ at all."
 
 (defun detect-alt-sequence (key)
   "Returns T if it's an ALT-sequence for the next key and NIL if it's a standalone ESC"
-  (let ((next-key (cl-charms:wget-wch *non-blocking-window*)))
+  (let ((next-key (charms/ll:wget-wch *non-blocking-window*)))
     (case next-key
-      (27 (cl-charms:unget-wch next-key)
+      (27 (charms/ll:unget-wch next-key)
           nil)
       (:error nil)
-      (t (cl-charms:unget-wch next-key)
+      (t (charms/ll:unget-wch next-key)
          t))))
 
 (defun keyname (key)
-  (cffi:foreign-string-to-lisp (cl-charms:keyname key)))
+  (cffi:foreign-string-to-lisp (charms/ll:keyname key)))
 
 (defun key-keyword (key)
   (make-keyword (map 'string (lambda (c)
@@ -88,7 +88,7 @@ at all."
                      (keyname key))))
 
 (defun ncurses-resize ()
-  (cl-charms:endwin)
-  (cl-charms:refresh)
+  (charms/ll:endwin)
+  (charms/ll:refresh)
   (resize)
   (refresh))

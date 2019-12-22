@@ -17,7 +17,7 @@
 
 (defun hide-window (frame)
   (with-slots (window) (frame frame)
-    (cl-charms:delwin window)
+    (charms/ll:delwin window)
     (setf window nil)))
 
 (defun show-window (frame nh nw ny nx)
@@ -29,11 +29,11 @@
             x nx)
       (when (frame-drawable-p frame)
         (cond (window
-               (ensure-ok (cl-charms:wresize window 1 1))
-               (ensure-ok (cl-charms:mvwin window y x))
-               (ensure-ok (cl-charms:wresize window h w)))
+               (ensure-ok (charms/ll:wresize window 1 1))
+               (ensure-ok (charms/ll:mvwin window y x))
+               (ensure-ok (charms/ll:wresize window h w)))
               (t
-               (setf window (cl-charms:newwin h w y x))))))))
+               (setf window (charms/ll:newwin h w y x))))))))
 
 (defgeneric frame-drawable-p (frame)
   (:documentation "Returns whether instances of this frame can be drawed on. Otherwise no
@@ -107,7 +107,7 @@
 (defun get-screen-size ()
   "Returns size of terminal screen."
   (let (rows columns)
-    (cl-charms:getmaxyx cl-charms:*stdscr* rows columns)
+    (charms/ll:getmaxyx charms/ll:*stdscr* rows columns)
     (list rows columns)))
 
 (defun frame-size (&optional frame)
@@ -129,13 +129,13 @@ Default FRAME is the whole screen."
 (defun render-frame (frame)
   (render-self frame)
   (awhen (slot-value (frame frame) 'window)
-    (cl-charms:wnoutrefresh it))
+    (charms/ll:wnoutrefresh it))
   (render-children frame))
 
 (defun refresh (&optional (frame *display*))
   (cond ((is-frame-displayed frame)
          (render-frame frame)
-         (cl-charms:doupdate))
+         (charms/ll:doupdate))
         (t (cerror "Ignore" "Attempt to refresh a frame ~S which is not a child of current root ~S"
                    frame *display*)))
   (values))
@@ -168,16 +168,16 @@ Default FRAME is the whole screen."
   "Converts keyword to ncurses attribute."
   (cond ((keywordp attribute) ; Simple attribute
          (ecase attribute
-           (:normal cl-charms:a_normal)
-           (:standout cl-charms:a_standout)
-           (:underline cl-charms:a_underline)
-           (:reverse cl-charms:a_reverse)
-           (:blink cl-charms:a_blink)
-           (:dim cl-charms:a_dim)
-           (:bold cl-charms:a_bold)
-           (:protect cl-charms:a_protect)
-           (:invis cl-charms:a_invis)
-           (:altcharset cl-charms:a_altcharset)))
+           (:normal charms/ll:a_normal)
+           (:standout charms/ll:a_standout)
+           (:underline charms/ll:a_underline)
+           (:reverse charms/ll:a_reverse)
+           (:blink charms/ll:a_blink)
+           (:dim charms/ll:a_dim)
+           (:bold charms/ll:a_bold)
+           (:protect charms/ll:a_protect)
+           (:invis charms/ll:a_invis)
+           (:altcharset charms/ll:a_altcharset)))
         ((and (listp attribute) ; Color
               (eq (first attribute) :color))
          (let ((pair (cond
@@ -188,7 +188,7 @@ Default FRAME is the whole screen."
                              (typep (second attribute) 'color)
                              (typep (third attribute) 'color))
                         (apply #'color-pair (cdr attribute))))))
-           (cl-charms:color-pair (ensure-color-pair pair))))
+           (charms/ll:color-pair (ensure-color-pair pair))))
         (t (error "Unknown attribute ~S" attribute))))
 
 (defun attributes-to-code (attributes)
@@ -213,9 +213,9 @@ they're disabled."
       `(let ((,attributes-code (attributes-to-code ,processed-attributes)))
          (unwind-protect
               (let ((*current-attributes* ,processed-attributes))
-                (cl-charms:wattron (slot-value (frame ,frame) 'window) ,attributes-code)
+                (charms/ll:wattron (slot-value (frame ,frame) 'window) ,attributes-code)
                 ,@body)
-           (cl-charms:wattroff (slot-value (frame ,frame) 'window) ,attributes-code))))))
+           (charms/ll:wattroff (slot-value (frame ,frame) 'window) ,attributes-code))))))
 
 ;;;; Colors
 
@@ -257,7 +257,7 @@ they're disabled."
   (with-slots (id r g b) color
     (unless id
       (setf id (incf *used-colors*))
-      (cl-charms:init-color id r g b))
+      (charms/ll:init-color id r g b))
     id))
 
 (defun ensure-color-pair (pair)
@@ -265,5 +265,5 @@ they're disabled."
     (unless id
       (setf id (incf *used-colors*))
       (let ((colors (mapcar #'ensure-color (list fg bg))))
-        (apply #'cl-charms:init-pair id colors)))
+        (apply #'charms/ll:init-pair id colors)))
     id))

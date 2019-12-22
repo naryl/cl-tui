@@ -1,7 +1,7 @@
 
 (defpackage cl-tui
   (:use :cl
-        :let+
+        :let-plus
         :alexandria
         :anaphora
         :split-sequence)
@@ -14,7 +14,6 @@
            #:refresh
 
            ; Frames
-           #:frame
            #:frame-size
            #:define-frame
            #:destroy-frame

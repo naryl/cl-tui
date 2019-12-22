@@ -11,7 +11,7 @@
                  (:file "input")
                  )
     :depends-on (cl-charms
-                 let+
+                 let-plus
                  alexandria
                  anaphora
                  split-sequence

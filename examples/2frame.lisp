@@ -17,4 +17,4 @@
 (defun frame ()
   (with-screen ()
     (refresh)
-    (loop :until (= 32 (read-key)))))
+    (loop :until (eql #\Space (read-key)))))

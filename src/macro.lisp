@@ -18,5 +18,5 @@
 (defmacro ensure-ok (form)
   (with-gensyms (result)
     `(let ((,result ,form))
-       (unless (= ,result cl-charms:ok)
+       (unless (= ,result charms/ll:ok)
          (cerror "Ignore" "Something went wrong here")))))

@@ -10,15 +10,15 @@
 
 (defun/frame put-text canvas-frame (frame y x str &rest format-args)
   (with-slots (window) frame
-    (ensure-ok (cl-charms:mvwaddstr window y x (apply #'format nil str format-args)))))
+    (ensure-ok (charms/ll:mvwaddstr window y x (apply #'format nil str format-args)))))
 
 (defun/frame put-char canvas-frame (frame y x c)
   (with-slots (window) frame
-    (ensure-ok (cl-charms:mvwaddch window y x (char-code c)))))
+    (ensure-ok (charms/ll:mvwaddch window y x (char-code c)))))
 
 (defun/frame draw-box canvas-frame (frame)
   (with-slots (window) frame
-    (ensure-ok (cl-charms:box window 0 0))))
+    (ensure-ok (charms/ll:box window 0 0))))
 
 ;;; Log frame-specific
 
@@ -37,7 +37,7 @@
 (defun/frame clear frame (frame)
   (etypecase frame
     (log-frame (setf (slot-value frame 'text) nil))
-    (canvas-frame (cl-charms:wclear (slot-value frame 'window)))))
+    (canvas-frame (charms/ll:wclear (slot-value frame 'window)))))
 
 ;;; Tabs manupulations
 
@@ -90,11 +90,11 @@
                                  (1+ (abs shift)))
                                 (t
                                  (- shift))))))))
-      (let+ (((:values tabs length) (get-neighbouring-tabs
-                                      (slot-value frame 'current-frame-position)))
-             (current-frame (slot-value frame 'current-frame)))
+      (multiple-value-bind (tabs length)
+          (get-neighbouring-tabs (slot-value frame 'current-frame-position))
+          (let ((current-frame (slot-value frame 'current-frame)))
         (with-slots (window) (frame current-frame)
-          (cl-charms:wmove window
+          (charms/ll:wmove window
                            top-padding
                            (+ left-padding
                               (- (truncate (slot-value frame 'w) 2)
@@ -103,6 +103,6 @@
             (dolist (tab tabs)
               (if (string= tab current-frame)
                 (with-attributes (:standout) current-frame
-                  (cl-charms:wprintw window tab))
-                (cl-charms:wprintw window tab))
-              (cl-charms:wprintw window (format nil "~vT" tab-padding)))))))))
+                  (charms/ll:wprintw window tab))
+                (charms/ll:wprintw window tab))
+              (charms/ll:wprintw window (format nil "~vT" tab-padding))))))))))

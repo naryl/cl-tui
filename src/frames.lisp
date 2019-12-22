@@ -127,13 +127,13 @@
           (lambda ()
             (funcall render
                      :frame name
-                     :h (cl-charms:getmaxy (slot-value frame 'window))
-                     :w (cl-charms:getmaxx (slot-value frame 'window))
+                     :h (charms/ll:getmaxy (slot-value frame 'window))
+                     :w (charms/ll:getmaxx (slot-value frame 'window))
                      :allow-other-keys t)))))
 
 (defmethod render-self ((frame callback-frame))
   (with-slots (render window) frame
-    (cl-charms:werase window)
+    (charms/ll:werase window)
     (when render
       (funcall render))))
 
@@ -156,7 +156,8 @@
   (attrs nil :type list))
 
 (defun log-default-line-render (text &key ts count)
-  (let+ (((:values sec min hour) (decode-universal-time ts)))
+  (multiple-value-bind (sec min hour)
+      (decode-universal-time ts)
     (format nil "~2,'0D:~2,'0D:~2,'0D ~A~A"
             hour min sec
             text
@@ -203,12 +204,12 @@
       (with-processed-attributes (log-line-attrs text) frame
         (loop :for offset :from (length split-lines) :downto 1
            :for text-line :in split-lines
-           :do (cl-charms:mvwaddstr window (- h line offset) 0 text-line)))
+           :do (charms/ll:mvwaddstr window (- h line offset) 0 text-line)))
       (length split-lines))))
 
 (defmethod render-self ((frame log-frame))
   (with-slots (window text h) frame
-    (cl-charms:werase window)
+    (charms/ll:werase window)
     (let ((i 0))
       (dolist (line text)
         (incf i (put-log-line frame line i))
