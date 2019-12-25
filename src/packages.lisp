@@ -9,32 +9,33 @@
            #:destroy-screen
            #:with-screen
 
-           ; Updates
+           ;; Updates
            #:display
            #:refresh
 
-           ; Frames
+           ;; Frames
+           #:frame
            #:frame-size
            #:define-frame
            #:destroy-frame
 
-           ; Common drawing routines
+           ;; Common drawing routines
            #:with-attributes
            #:color
            #:color-pair
            #:clear-colors
 
-           ; Containers
+           ;; Containers
            #:container-frame
 
-           ; Canvas frames
+           ;; Canvas frames
            #:retained-frame
            #:callback-frame
            #:draw-box
            #:put-char
            #:put-text
 
-           ; Log frame
+           ;; Log frame
            #:log-frame
            #:append-line
            #:append-text
@@ -47,6 +48,13 @@
            #:tab-backwards
            #:draw-tab-bar
 
-           ; Input
+           ;;
+           #:edit-frame
+           #:handle-key
+           #:set-prompt
+           #:get-text
+           
+           ;; Input
            #:read-key
+
    ))

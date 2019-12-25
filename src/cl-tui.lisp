@@ -48,7 +48,7 @@
 (defmacro with-screen ((&body arguments) &body body)
   "Ensures that wrapped code will be executed after successful
 initialization of screen and that screen will be properly
-deinitialized after `body' is executed (or reaised error)."
+deinitialized after `body' is executed (or raised error)."
   `(unwind-protect
         (progn (init-screen ,@arguments)
                ,@body)

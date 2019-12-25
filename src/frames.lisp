@@ -246,3 +246,23 @@
             h (slot-value frame 'h))
       (show-window (car child) h w y x)
       (calculate-layout (car child)))))
+
+;;; Edit frame
+
+(defclass edit-frame (frame)
+  ((prompt :initform "" :initarg :prompt :writer set-prompt)
+   (vedit :initform (vedit:make-vedit))))
+
+(defmethod frame-drawable-p ((frame edit-frame))
+  t)
+
+(defmethod render-self ((frame edit-frame))
+  (with-slots (window prompt vedit) frame
+    (ensure-ok (charms/ll:mvwaddstr window 0 0 (format nil "~A~A" prompt (vedit:text vedit))))
+    (ensure-ok (charms/ll:move 0 (+ (length prompt) (vedit:point vedit))))))
+
+(defun/frame get-text edit-frame (frame)
+  (vedit:text (slot-value frame 'vedit)))
+
+(defun/frame handle-key edit-frame (frame key)
+  (vedit:handle-key (slot-value frame 'vedit) key))

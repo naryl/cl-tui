@@ -115,8 +115,8 @@
 Default FRAME is the whole screen."
   (if (null frame)
     (get-screen-size)
-    (list (slot-value frame 'h)
-          (slot-value frame 'w))))
+    (list (slot-value (frame frame) 'h)
+          (slot-value (frame frame) 'w))))
 
 (defun is-frame-displayed (frame)
   (cond ((eq frame *display*)

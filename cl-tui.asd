@@ -15,4 +15,5 @@
                  alexandria
                  anaphora
                  split-sequence
+                 vedit
                  osicat))
