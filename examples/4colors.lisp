@@ -34,7 +34,7 @@
 
 (define-frame callback (callback-frame :render 'main-render) :on :root)
 
-(defun colors ()
+(defun start ()
   (with-screen (:colors)
     (refresh)
     (read-key)))

@@ -20,7 +20,12 @@
   (with-slots (window) frame
     (ensure-ok (charms/ll:box window 0 0))))
 
-;;; Log frame-specific
+;;; Container frame
+
+(defun/frame set-split-type container-frame (frame split-type)
+  (setf (slot-value frame 'split-type) split-type))
+
+;;; Log frame
 
 (defun/frame append-line log-frame (frame str &rest format-args)
   (with-slots (text) frame
@@ -106,3 +111,14 @@
                   (charms/ll:wprintw window tab))
                 (charms/ll:wprintw window tab))
               (charms/ll:wprintw window (format nil "~vT" tab-padding))))))))))
+
+;;; Edit frame
+
+(defun/frame get-text edit-frame (frame)
+  (vedit:text (slot-value frame 'vedit)))
+
+(defun/frame clear-text edit-frame (frame)
+  (vedit:clear (slot-value frame 'vedit)))
+
+(defun/frame handle-key edit-frame (frame key)
+  (vedit:handle-key (slot-value frame 'vedit) key))

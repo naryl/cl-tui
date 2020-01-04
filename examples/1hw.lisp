@@ -4,7 +4,7 @@
 
 (in-package cl-tui.examples)
 
-(defun hw ()
+(defun start ()
   (with-screen ()
     (put-text :root 0 0 "Hello world!")
     (refresh)

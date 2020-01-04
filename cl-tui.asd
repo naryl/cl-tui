@@ -6,6 +6,7 @@
                  (:file "macro")
                  (:file "frame-base")
                  (:file "frames")
+                 (:file "layouts")
                  (:file "drawers")
                  (:file "cl-tui")
                  (:file "input")

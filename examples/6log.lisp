@@ -6,7 +6,7 @@
 
 (define-frame log (log-frame) :on :root)
 
-(defun log-test ()
+(defun start ()
   (with-screen (:colors)
     (with-attributes ((:color (color 0 600 600) (color 800 800 0)))
         'log

@@ -14,7 +14,7 @@
 
 (define-frame callback (callback-frame :render 'main-render) :on t)
 
-(defun frame ()
+(defun start ()
   (with-screen ()
     (refresh)
     (loop :until (eql #\Space (read-key)))))

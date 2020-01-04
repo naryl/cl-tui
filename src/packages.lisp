@@ -14,7 +14,6 @@
            #:refresh
 
            ;; Frames
-           #:frame
            #:frame-size
            #:define-frame
            #:destroy-frame
@@ -27,6 +26,7 @@
 
            ;; Containers
            #:container-frame
+           #:set-split-type
 
            ;; Canvas frames
            #:retained-frame
@@ -48,11 +48,12 @@
            #:tab-backwards
            #:draw-tab-bar
 
-           ;;
+           ;; Edit frame
            #:edit-frame
            #:handle-key
            #:set-prompt
            #:get-text
+           #:clear-text
            
            ;; Input
            #:read-key

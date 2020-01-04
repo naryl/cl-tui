@@ -19,7 +19,7 @@
 (define-frame scene-3 (callback-frame :render #'render-scene) :on :root)
 (define-frame scene-4 (callback-frame :render #'render-scene))
 
-(defun scenes ()
+(defun start ()
   (with-screen ()
     (display 'scene-1)
     (loop (case (read-key)

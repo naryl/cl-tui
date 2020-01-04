@@ -17,86 +17,12 @@
 (defmethod add-child ((frame container-frame) child &rest placement)
   (with-slots (children) frame
     (deletef children child :key #'car)
-    (push (list* child placement) children)))
+    (appendf children (list (list* child placement)))))
 
 (defmethod remove-child ((frame container-frame) child)
   (with-slots (children) frame
     (setf (slot-value (frame child) 'parent) nil)
     (deletef children child :key #'car)))
-
-(defun placement-width (placement &optional default)
-  (getf placement :w default))
-
-(defun placement-height (placement &optional default)
-  (getf placement :h default))
-
-(defun frame-free-p (placement)
-  (not (or (placement-width placement)
-           (placement-height placement))))
-
-(defmethod calculate-layout ((frame container-frame))
-  (with-slots (h w y x children split-type) frame
-    (cond
-      ((null children)
-       nil)
-      ((or (= 1 (length children))
-           (eql split-type :none))
-       (show-window (caar children) h w y x)
-       (calculate-layout (caar children)))
-      (t
-       (let ((limit (ecase split-type
-                      (:horizontal h)
-                      (:vertical w)))
-             (reserved-size (loop
-                              for (child . placement) in children
-                              summing (ecase split-type
-                                        (:horizontal
-                                          (placement-height placement 0))
-                                        (:vertical
-                                          (placement-width placement 0)))))
-             (free-frames-count (max 1 (count-if (compose #'frame-free-p #'cdr)
-                                                 children))))
-         (loop
-           with shift = 0
-           with free-frames-seen = 0
-           with space-left = (- limit reserved-size)
-           with step = (truncate (- limit reserved-size) free-frames-count)
-           for (child . placement) in children
-           doing
-           (let ((x (+ x (ecase split-type
-                           (:horizontal 0)
-                           (:vertical shift))))
-                 (y (+ y (ecase split-type
-                           (:horizontal shift)
-                           (:vertical 0))))
-                 (h (ecase split-type
-                      (:horizontal (placement-height placement step))
-                      (:vertical h)))
-                 (w (ecase split-type
-                      (:horizontal w)
-                      (:vertical (placement-width placement step)))))
-             (cond
-               ((frame-free-p placement)
-                (incf free-frames-seen)
-                (cond
-                  ((= free-frames-seen free-frames-count)
-                   (incf shift (- space-left step))
-                   (ecase split-type
-                     (:horizontal (show-window child space-left w y x))
-                     (:vertical (show-window child h space-left y x))))
-                  (t
-                   (show-window child h w y x)))
-                (decf space-left
-                      (ecase split-type
-                        (:horizontal h)
-                        (:vertical w))))
-               (t
-                (show-window child h w y x)))
-             (incf shift
-                   (ecase split-type
-                     (:horizontal h)
-                     (:vertical w)))
-             (calculate-layout child))))))))
 
 (defmethod render-children ((frame container-frame))
   (mapcar (compose #'render-frame #'car)
@@ -257,12 +183,14 @@
   t)
 
 (defmethod render-self ((frame edit-frame))
-  (with-slots (window prompt vedit) frame
-    (ensure-ok (charms/ll:mvwaddstr window 0 0 (format nil "~A~A" prompt (vedit:text vedit))))
-    (ensure-ok (charms/ll:move 0 (+ (length prompt) (vedit:point vedit))))))
+  (with-slots (window prompt vedit w) frame
+    (let* ((text (vedit:text vedit))
+           (point (vedit:point vedit)))
+      (ensure-ok (charms/ll:mvwaddstr window 0 0 (format nil "~A~A" prompt text)))
+      
+      (let* ((filler-size (- w (charms/ll:getcurx window) 1))
+             (filler (make-string filler-size :initial-element #\Space)))
+        (ensure-ok (charms/ll:waddstr window filler)))
+      (ensure-ok (charms/ll:mvwchgat window 0 (+ (length prompt) point)
+                                     1 charms/ll:a_reverse 0 (cffi:null-pointer))))))
 
-(defun/frame get-text edit-frame (frame)
-  (vedit:text (slot-value frame 'vedit)))
-
-(defun/frame handle-key edit-frame (frame key)
-  (vedit:handle-key (slot-value frame 'vedit) key))

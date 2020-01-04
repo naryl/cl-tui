@@ -19,4 +19,4 @@
   (with-gensyms (result)
     `(let ((,result ,form))
        (unless (= ,result charms/ll:ok)
-         (cerror "Ignore" "Something went wrong here")))))
+         (cerror "Ignore" "Something went wrong in ~S~%Result: ~S" ',form ,result)))))

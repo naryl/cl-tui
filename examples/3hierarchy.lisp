@@ -1,5 +1,4 @@
 
-
 (defpackage cl-tui.examples
   (:use :cl :cl-tui))
 
@@ -15,7 +14,7 @@
 
 (define-frame callback2 (callback-frame :render 'main-render2) :on callback)
 
-(defun hierarchy ()
+(defun start ()
   (cl-tui:with-screen ()
     (refresh)
     (loop :until (eql #\Space (read-key)))))
