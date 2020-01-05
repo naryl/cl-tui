@@ -1,6 +1,8 @@
 # cl-tui - Text User Interface for Common Lisp
 
-Cl-tui is a library for text user interfaces like that of [ncmpcpp](https://screenshots.debian.net/screenshots/n/ncmpcpp/4889_large.png) or [Dungeon Crawl](http://screenshots.debian.net/screenshots/c/crawl/1023_large.png)
+cl-tui is a library for text user interfaces like that of
+[ncmpcpp](http://screenshots.debian.net/screenshots/000/012/942/large.png)
+or [Dungeon Crawl](http://screenshots.debian.net/screenshots/000/001/023/large.png)
 
 It's currently in development and not intended for general use.
 
