@@ -1,4 +1,12 @@
 
+(defpackage :vedit
+  (:use :common-lisp
+        :containers)
+  (:export #:make-vedit
+           #:text #:point
+           #:clear #:handle-key
+           ))
+
 (defpackage cl-tui
   (:use :cl
         :let-plus

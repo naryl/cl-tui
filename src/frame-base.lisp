@@ -156,7 +156,8 @@ Default FRAME is the whole screen."
 
 (defun resize ()
   "Makes sure *DISPLAY* frame and all its children have proper place on the screen"
-  (let+ (((h w) (frame-size)))
+  (destructuring-bind (h w)
+      (frame-size)
     (show-window *display* h w 0 0))
   (calculate-layout (frame *display*)))
 

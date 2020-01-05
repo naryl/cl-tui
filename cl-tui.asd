@@ -16,5 +16,5 @@
                  alexandria
                  anaphora
                  split-sequence
-                 vedit
+                 cl-containers
                  osicat))
