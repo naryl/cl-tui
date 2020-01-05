@@ -11,16 +11,20 @@
   (put-text frame 2 1 "Space to show all frames tiled")
   (put-text frame 3 1 "q to quit")
   (when (eq frame 'scene-4)
-    (put-text frame 4 1 "This frame is not a part of :root frame"))
-  )
+    (put-text frame 4 1 "This frame is not a part of :root frame")))
 
+;; Three frames are on top of :root. By default if the :root frame is
+;; displayed they'll be positioned horizontally.
 (define-frame scene-1 (callback-frame :render #'render-scene) :on :root)
 (define-frame scene-2 (callback-frame :render #'render-scene) :on :root)
 (define-frame scene-3 (callback-frame :render #'render-scene) :on :root)
+;; Fourth frame is not positioned on any frame. It can only be displayed directly with a `display` call.
 (define-frame scene-4 (callback-frame :render #'render-scene))
 
 (defun start ()
   (with-screen ()
+    ;; `display` displays a frame and its children on the whole screen.
+    ;; Before the first `display` call the :root frame is displayed
     (display 'scene-1)
     (loop (case (read-key)
             (#\q (return))

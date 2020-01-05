@@ -4,6 +4,9 @@
 
 (in-package cl-tui.examples)
 
+;; Log frame displays lines of text. It has optional deduplication
+;; (enabled in this example) and attributes can be applied to whole
+;; lines
 (define-frame log (log-frame :deduplicate-lines t) :on :root)
 
 (defun start ()

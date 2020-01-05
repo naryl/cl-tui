@@ -66,8 +66,6 @@
                         &rest placement &key ((:on parent) nil)
                         &allow-other-keys)
   (remf placement :on)
-  (when (eq parent t)
-    (setf parent :root))
   `(progn (setf (frame ',name)
                 (make-instance ',type ,@frame-args
                                :name ',name

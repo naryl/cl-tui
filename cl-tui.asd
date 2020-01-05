@@ -1,8 +1,12 @@
 
 (defsystem cl-tui
+    :author "Alexander Sukhoverkhov"
+    :description "High-level library for making Text User Interfaces"
+    :license "MIT"
     :pathname "src/"
     :serial t
     :components ((:file "packages")
+                 (:file "vedit")
                  (:file "macro")
                  (:file "frame-base")
                  (:file "frames")
