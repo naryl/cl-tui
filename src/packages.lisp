@@ -9,7 +9,6 @@
 
 (defpackage cl-tui
   (:use :cl
-        :let-plus
         :alexandria
         :anaphora
         :split-sequence)
