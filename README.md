@@ -9,6 +9,10 @@ tested. Please, report bugs either on
 [github's](https://github.com/naryl/cl-tui/issues) or
 [SourceForge's](https://sourceforge.net/p/cl-tui/tickets/) issue tracker.
 
+Supported implementations are SBCL, CCL. I want to also support ECL and CLISP
+but ECL currently can't build osicat (investigated by osicat developers) and
+CLISP had a lot of issues with ncurses. Any help with CLISP is appreciated.
+
 # Documentation
 
 Follow the very well-commented examples in the examples directory. Each new
