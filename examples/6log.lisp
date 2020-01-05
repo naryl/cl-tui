@@ -4,7 +4,7 @@
 
 (in-package cl-tui.examples)
 
-(define-frame log (log-frame) :on :root)
+(define-frame log (log-frame :deduplicate-lines t) :on :root)
 
 (defun start ()
   (with-screen (:colors)

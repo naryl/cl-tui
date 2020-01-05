@@ -70,7 +70,10 @@
          :initform nil)
    (line-render :type function
                 :initarg :line-render
-                :initform #'log-default-line-render)))
+                :initform #'log-default-line-render)
+   (deduplicate-lines :type boolean
+                      :initarg :deduplicate-lines
+                      :initform nil)))
 
 (defmethod frame-drawable-p ((frame log-frame))
   t)

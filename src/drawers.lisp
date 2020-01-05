@@ -28,10 +28,11 @@
 ;;; Log frame
 
 (defun/frame append-line log-frame (frame str &rest format-args)
-  (with-slots (text) frame
+  (with-slots (text deduplicate-lines) frame
     (let ((last-line (car text))
           (new-line (apply #'format nil str format-args)))
       (if (and last-line
+               deduplicate-lines
                (string= new-line (log-line-text last-line)))
           (incf (log-line-count last-line))
           (push (make-log-line :text new-line :attrs *current-attributes*) text))
