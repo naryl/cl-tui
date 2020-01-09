@@ -15,7 +15,7 @@
                  (:file "cl-tui")
                  (:file "input")
                  )
-    :depends-on (cl-charms
+    :depends-on (cl-charms-ll
                  alexandria
                  anaphora
                  split-sequence

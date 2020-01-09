@@ -13,6 +13,9 @@ Supported implementations are SBCL, CCL. I want to also support ECL and CLISP
 but ECL currently can't build osicat (investigated by osicat developers) and
 CLISP had a lot of issues with ncurses. Any help with CLISP is appreciated.
 
+`cl-tui` is supposed to be a complete abstraction so if you have to use
+`cl-charms` directly for some reason please submit an issue describing your use-case.
+
 # Documentation
 
 Follow the very well-commented examples in the examples directory. Each new
