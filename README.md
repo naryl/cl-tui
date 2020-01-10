@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/naryl/cl-tui.svg?branch=master)](https://travis-ci.com/naryl/cl-tui)
+
 # cl-tui - Text User Interface for Common Lisp
 
 cl-tui is a library for text user interfaces like that of
