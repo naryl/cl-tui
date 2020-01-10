@@ -7,13 +7,13 @@ env:
     - LISP=ccl
     - LISP=ecl
 
-install:
-  # Install cl-travis
-  - curl https://raw.githubusercontent.com/luismbo/cl-travis/master/install.sh | bash
-
 matrix:
   allow_failures:
     - env: LISP=ecl
+
+install:
+  # Install cl-travis
+  - curl https://raw.githubusercontent.com/luismbo/cl-travis/master/install.sh | bash
 
 script:
   - cl -e '(ql:quickload :cl-tui)
