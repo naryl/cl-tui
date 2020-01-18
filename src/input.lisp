@@ -6,21 +6,6 @@
   characters put into queue by UNGETCH are not immediately read by GETCH. GETCH can
   receive them only on the next call.")
 
-(defvar *need-resize* nil)
-
-;;; FIXME:
-;;; No idea what to do on e.g. Windows and a few other implementations without signal
-;;; handlers support.
-#+sbcl
-(defun sigwinch-handler (a b c)
-  (declare (ignore a b c))
-  (if *in-getch*
-      (ncurses-resize)
-      (setf *need-resize* t)))
-
-#+sbcl
-(sb-sys:enable-interrupt sb-posix:sigwinch #'sigwinch-handler)
-
 (defvar *non-blocking-window* nil)
 
 (defun read-key ()
@@ -36,17 +21,16 @@ Ctrl and Shift keys modify the primary value.
 Ctrl+anything generates a non-printable character.
 Shift key is reported by making the primary value uppercase. Ctrl+Shift can't be detected
 at all."
-  (when *need-resize*
-    (setf *need-resize* nil)
-    (ncurses-resize))
   ;; Using SETF instead of LET because sigwinch handler doesn't see the dynamic binding
   (setf *in-getch* t)
-  (let ((key (charms/ll:wget-wch charms/ll:*stdscr*))
+  (let ((key (unwind-protect
+                  (charms/ll:wget-wch charms/ll:*stdscr*)
+               (setf *in-getch* nil)))
         (alt nil))
-    (setf *in-getch* nil)
     (if (eq key :error) ; No input in non-blocking mode
         (values nil nil)
-        (let ((char (cond ((equal (keyname key) "KEY_RESIZE") ; Ignore key_resize completely
+        (let ((char (cond ((equal (keyname key) "KEY_RESIZE")
+                           (ncurses-resize)
                            (read-key))
                           ((key-esc-p key)
                            (cond ((detect-alt-sequence key)
@@ -61,8 +45,7 @@ at all."
           (values char alt)))))
 
 (defun key-function-p (key)
-  (<= 256 key #.(parse-integer (format nil "~A" charms/ll:key_event)
-                               :radix 8)))
+  (<= 256 key charms/ll:key_event))
 
 (defun key-esc-p (key)
   (= key 27))
@@ -88,7 +71,9 @@ at all."
                      (keyname key))))
 
 (defun ncurses-resize ()
-  (charms/ll:endwin)
-  (charms/ll:refresh)
+  (charms/ll:resizeterm charms/ll:*lines* charms/ll:*cols*)
+  ;; resizeterm produces another KEY_RESIZE smh
+  (charms/ll:wget-wch charms/ll:*stdscr*)
   (resize)
   (refresh))
+

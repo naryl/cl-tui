@@ -1,6 +1,8 @@
 
 (in-package cl-tui)
 
+(declaim (optimize (debug 3) (safety 3) (speed 0)))
+
 ;;; Container
 
 (defun placement-width (placement)
@@ -27,7 +29,7 @@
                                               children)))
            (extra-space (- max reserved-size))
            (per-free (truncate extra-space free-frames-count))
-           (extra-extra-space (- extra-space (* extra-space free-frames-count)))
+           (extra-extra-space (- extra-space (* per-free free-frames-count)))
            (first-free-frame t))
       (loop :for i :from 0
          :for (child . placement) :in children

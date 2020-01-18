@@ -14,7 +14,11 @@
   (sunless *non-blocking-window*
     (setf it (charms/ll:newwin 1 1 0 0))
     (charms/ll:wtimeout it 0))
-  (dolist (argument (list* :raw :noecho :keypad :nocursor arguments))
+  ;; There's no good way to handle resizing, especially on
+  ;; Windows (PDCurses) without keypad and KEY_RESIZE
+  (charms/ll:keypad charms/ll:*stdscr* 1)
+  (charms/ll:keypad *non-blocking-window* 1)
+  (dolist (argument (list* :raw :noecho :nocursor arguments))
     (case argument
       (:echo     (charms/ll:echo))
       (:noecho   (charms/ll:noecho))
@@ -26,10 +30,6 @@
       (:nocursor (charms/ll:curs-set 0))
       (:delay    (charms/ll:nodelay charms/ll:*stdscr* 0))
       (:nodelay  (charms/ll:nodelay charms/ll:*stdscr* 1))
-      (:keypad   (charms/ll:keypad charms/ll:*stdscr* 1)
-                 (charms/ll:keypad *non-blocking-window* 1))
-      (:nokeypad (charms/ll:keypad charms/ll:*stdscr* 0)
-                 (charms/ll:keypad *non-blocking-window* 0))
       (:colors (init-color))))
   (do-delayed-init)
   (charms/ll:clear)
@@ -41,6 +41,9 @@
   "Return terminal to default mode"
   (unless *running*
     (error "Screen is not initialized"))
+  (charms/ll:nocbreak)
+  (charms/ll:keypad charms/ll:*stdscr* 0)
+  (charms/ll:echo)
   (charms/ll:endwin)
   (setf *running* nil)
   (values))

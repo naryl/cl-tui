@@ -21,6 +21,8 @@
     (setf window nil)))
 
 (defun show-window (frame nh nw ny nx)
+  (unless (every #'non-negative-fixnum-p (list nh nw ny nx))
+    (error "SHOW-WINDOW got negative size or position"))
   (let ((frame (frame frame)))
     (with-slots (h w y x window) frame
       (setf h nh
@@ -28,12 +30,13 @@
             y ny
             x nx)
       (when (frame-drawable-p frame)
-        (cond (window
+        (cond ((or (null window)
+                   (cffi:null-pointer-p window))
+               (setf window (charms/ll:newwin h w y x)))
+              (t
                (ensure-ok (charms/ll:wresize window 1 1))
                (ensure-ok (charms/ll:mvwin window y x))
-               (ensure-ok (charms/ll:wresize window h w)))
-              (t
-               (setf window (charms/ll:newwin h w y x))))))))
+               (ensure-ok (charms/ll:wresize window h w))))))))
 
 (defgeneric frame-drawable-p (frame)
   (:documentation "Returns whether instances of this frame can be drawed on. Otherwise no
@@ -131,11 +134,11 @@ Default FRAME is the whole screen."
   (render-children frame))
 
 (defun refresh (&optional (frame *display*))
-  (cond ((is-frame-displayed frame)
-         (render-frame frame)
-         (charms/ll:doupdate))
-        (t (cerror "Ignore" "Attempt to refresh a frame ~S which is not a child of current root ~S"
-                   frame *display*)))
+  (when (not (is-frame-displayed frame))
+    (cerror "Ignore" "Attempt to refresh a frame ~S which is not a child of current root ~S"
+            frame *display*))
+  (render-frame frame)
+  (charms/ll:doupdate)
   (values))
 
 (defgeneric render-self (frame)

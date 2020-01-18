@@ -176,10 +176,13 @@
     ;; Delete
     ((#\Esc #\[ #\3 #\~)
      (rem-char vedit))
-    ;; Home
+    ((:key-home)
+     (move-full vedit -1))
     ((#\Esc #\[ #\H)
      (move-full vedit -1))
     ;; End
+    ((:key-end)
+     (move-full vedit 1))
     ((#\Esc #\[ #\F)
      (move-full vedit 1))
     ;; Right

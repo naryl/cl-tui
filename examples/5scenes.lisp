@@ -22,6 +22,7 @@
 (define-frame scene-4 (callback-frame :render #'render-scene))
 
 (defun start ()
+  (read-line)
   (with-screen ()
     ;; `display` displays a frame and its children on the whole screen.
     ;; Before the first `display` call the :root frame is displayed
