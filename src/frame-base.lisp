@@ -80,6 +80,12 @@
             (resize))
           ',name))
 
+(defmacro define-children (name () &body children)
+  `(progn
+     ,@(mapcar (lambda (child)
+                 `(define-frame ,@child :on ,name))
+               children)))
+
 (defun destroy-frame (name)
   (let ((frame (frame name)))
     (awhen frame

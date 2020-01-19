@@ -40,7 +40,5 @@
  * [X] Detecting ctrl (not)
  * [X] Try to detect alt if INIT-SCREEN asked for non-blocking io
  * [X] ^^^^ and even make a hack for blocking io
-* [ ] Move cursor to a particular place after each update
 * [X] Don't REFRESH frames which are currently not displayed.
 * [ ] Optionally display debugger with restarts in a special frame
-* [ ] Find a way to make SIGWINCH handler work in more implementations.

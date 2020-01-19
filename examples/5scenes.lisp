@@ -15,9 +15,13 @@
 
 ;; Three frames are on top of :root. By default if the :root frame is
 ;; displayed they'll be positioned horizontally.
-(define-frame scene-1 (callback-frame :render #'render-scene) :on :root)
-(define-frame scene-2 (callback-frame :render #'render-scene) :on :root)
-(define-frame scene-3 (callback-frame :render #'render-scene) :on :root)
+
+;; define-children defines several frames placing them on the same other frame in order
+;; Ensures that frames order won't be messed up if you redefine them individually
+(define-children :root ()
+  (scene-1 (callback-frame :render #'render-scene))
+  (scene-2 (callback-frame :render #'render-scene))
+  (scene-3 (callback-frame :render #'render-scene)))
 ;; Fourth frame is not positioned on any frame. It can only be displayed directly with a `display` call.
 (define-frame scene-4 (callback-frame :render #'render-scene))
 

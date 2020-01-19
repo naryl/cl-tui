@@ -23,6 +23,7 @@
            ;; Frames
            #:frame-size
            #:define-frame
+           #:define-children
            #:destroy-frame
 
            ;; Common drawing routines
