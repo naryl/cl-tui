@@ -37,8 +37,7 @@
            #:set-split-type
 
            ;; Canvas frames
-           #:retained-frame
-           #:callback-frame
+           #:simple-frame
            #:draw-box
            #:put-char
            #:put-text

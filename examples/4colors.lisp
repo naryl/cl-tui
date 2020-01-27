@@ -37,7 +37,7 @@
         (dotimes (j 3)
           (put-char 'callback (+ 2 j) (1+ i) #\X))))))
 
-(define-frame callback (callback-frame :render 'main-render) :on :root)
+(define-frame callback (simple-frame :render 'main-render) :on :root)
 
 (defun start ()
   (with-screen (:colors)

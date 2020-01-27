@@ -35,18 +35,13 @@
 (defmethod frame-drawable-p ((frame canvas-frame))
   t)
 
-;;; Retained frame
+;;; Simple frame
 
-(defclass retained-frame (canvas-frame)
-  ())
-
-;;; Callback frame
-
-(defclass callback-frame (canvas-frame)
-  ((render :type function
+(defclass simple-frame (canvas-frame)
+  ((render :type (or function null)
            :initform nil)))
 
-(defmethod initialize-instance ((frame callback-frame) &key name render &allow-other-keys)
+(defmethod initialize-instance ((frame simple-frame) &key name render &allow-other-keys)
   (call-next-method)
   (when render
     (setf (slot-value frame 'render)
@@ -57,10 +52,10 @@
                      :w (charms/ll:getmaxx (slot-value frame 'window))
                      :allow-other-keys t)))))
 
-(defmethod render-self ((frame callback-frame))
+(defmethod render-self ((frame simple-frame))
   (with-slots (render window) frame
-    (charms/ll:werase window)
     (when render
+      (charms/ll:werase window)
       (funcall render))))
 
 ;;; Log frame

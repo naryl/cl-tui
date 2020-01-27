@@ -14,8 +14,8 @@
 ;; each child occupies equal space either horizontally or vertically
 (define-frame container (container-frame) :on :root)
 
-;; Placing callback frame on the container instead of :root
-(define-frame callback (callback-frame :render 'main-render) :on container)
+;; Placing the frame on the container instead of :root
+(define-frame callback (simple-frame :render 'main-render) :on container)
 
 (defun start ()
   (cl-tui:with-screen ()

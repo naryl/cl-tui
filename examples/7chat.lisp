@@ -20,6 +20,7 @@
   (with-screen ()
     (set-split-type :root :vertical)
     (append-line 'log "Enter some text.")
+    (append-line 'log "Esc to quit")
     (loop
        (refresh)
        (let ((key (read-key)))
