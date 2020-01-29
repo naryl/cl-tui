@@ -174,16 +174,27 @@
 ;;; Edit frame
 
 (defclass edit-frame (frame)
-  ((prompt :initform "" :initarg :prompt :writer set-prompt)
+  ((prompt :initform ""
+           :initarg :prompt
+           :writer set-prompt
+           :type (string trivial-types:function-designator null))
    (vedit :initform (vedit:make-vedit))))
 
 (defmethod frame-drawable-p ((frame edit-frame))
   t)
 
+(defun edit-frame-prompt-string (edit)
+  (with-slots (prompt) edit
+    (etypecase prompt
+      (null "")
+      (string prompt)
+      (trivial-types:function-designator (funcall prompt)))))
+
 (defmethod render-self ((frame edit-frame))
-  (with-slots (window prompt vedit w) frame
+  (with-slots (window vedit w) frame
     (let* ((text (vedit:text vedit))
-           (point (vedit:point vedit)))
+           (point (vedit:point vedit))
+           (prompt (edit-frame-prompt-string frame)))
       (ensure-ok (charms/ll:mvwaddstr window 0 0 (format nil "~A~A" prompt text)))
       
       (let* ((filler-size (- w (charms/ll:getcurx window) 1))
