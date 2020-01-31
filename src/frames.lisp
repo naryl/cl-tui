@@ -188,7 +188,7 @@
     (etypecase prompt
       (null "")
       (string prompt)
-      (trivial-types:function-designator (funcall prompt)))))
+      (trivial-types:function-designator (or (funcall prompt) "")))))
 
 (defmethod render-self ((frame edit-frame))
   (with-slots (window vedit w) frame

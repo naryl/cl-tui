@@ -16,6 +16,7 @@
                  (:file "input")
                  )
     :depends-on (cl-charms
+                 trivial-types
                  alexandria
                  anaphora
                  split-sequence
