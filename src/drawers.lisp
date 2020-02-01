@@ -27,16 +27,23 @@
 
 ;;; Log frame
 
-(defun/frame append-line log-frame (frame str &rest format-args)
-  (with-slots (text deduplicate-lines) frame
-    (let ((last-line (car text))
-          (new-line (apply #'format nil str format-args)))
-      (if (and last-line
+(defun/frame scroll-log log-frame (frame offset)
+  (setf (slot-value frame 'offset)
+        (alexandria:clamp (+ (slot-value frame 'offset) offset) 0 (1- (length (slot-value frame 'lines))))))
+
+(defun/frame append-line log-frame (frame obj &rest init-args)
+  (with-slots (lines deduplicate-lines) frame
+    (let ((last-obj (car lines))
+          (new-obj (if (stringp obj)
+                       (apply 'format nil obj init-args)
+                       (apply 'make-instance init-args))))
+      (if (and last-obj
                deduplicate-lines
-               (string= new-line (log-line-text last-line)))
-          (incf (log-line-count last-line))
-          (push (make-log-line :text new-line :attrs *current-attributes*) text))
-      new-line)))
+               (stringp obj)
+               (string= new-obj (log-line-line last-obj)))
+          (incf (log-line-count last-obj))
+          (push (make-log-line :line new-obj) lines))
+      new-obj)))
 
 ;;; Common stuff
 

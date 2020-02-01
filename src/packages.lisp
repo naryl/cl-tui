@@ -47,6 +47,7 @@
            #:append-line
            #:append-text
            #:clear
+           #:scroll-log
 
            ;; Tabbed frame
            #:tabbed-frame

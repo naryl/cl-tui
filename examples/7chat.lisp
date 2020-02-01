@@ -28,5 +28,7 @@
            ;; Esc and Newline are handled here
            (#\Esc (return))
            (#\Newline (finish-input))
+           (:key-up (cl-tui:scroll-log 'log 1))
+           (:key-down (cl-tui:scroll-log 'log -1))
            ;; Everything else is sent to the edit-frame.
            (t (handle-key 'input key)))))))

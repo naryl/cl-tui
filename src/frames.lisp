@@ -61,11 +61,10 @@
 ;;; Log frame
 
 (defclass log-frame (frame)
-  ((text :type list
+  ((lines :type list
          :initform nil)
-   (line-render :type function
-                :initarg :line-render
-                :initform #'log-default-line-render)
+   (offset :type fixnum
+           :initform 0)
    (deduplicate-lines :type boolean
                       :initarg :deduplicate-lines
                       :initform nil)))
@@ -74,20 +73,35 @@
   t)
 
 (defstruct log-line
-  (text "" :type string)
+  (line "" :type (or string standard-object))
   (ts (get-universal-time) :type integer)
-  (count 1 :type fixnum)
-  (attrs nil :type list))
+  (count 1 :type fixnum))
 
-(defun log-default-line-render (text &key ts count)
-  (multiple-value-bind (sec min hour)
-      (decode-universal-time ts)
-    (format nil "~2,'0D:~2,'0D:~2,'0D ~A~A"
-            hour min sec
-            text
-            (if (> count 1)
-                (format nil " x~A" count)
-                ""))))
+(defgeneric render-log-line (frame line y w &key ts count)
+  (:documentation "Renders the log line to an ncurses window.
+FRAME - frame to render to
+LINE - object to render
+Y - LAST line to be occupied by the line
+W - frame width
+TS - timestamp when the line was added
+COUNT - count of repeating lines when deduplication is enabled
+"))
+
+(defmethod render-log-line (frame (text string) y w &key ts count)
+  (with-slots (window) frame
+    (multiple-value-bind (sec min hour)
+        (decode-universal-time ts)
+      (let* ((text (format nil "~2,'0D:~2,'0D:~2,'0D ~A~A"
+                           hour min sec
+                           text
+                           (if (> count 1)
+                               (format nil " x~A" count)
+                               "")))
+             (split-lines (split-line text w)))
+        (loop :for offset :from (length split-lines) :downto 1
+           :for text-line :in split-lines
+           :do (charms/ll:mvwaddstr window (- y offset) 0 text-line))
+        (length split-lines)))))
 
 (defun split-line (text width)
   (if (<= (length text) width)
@@ -118,24 +132,19 @@
                 (nreverse result)))))
 
 (defun put-log-line (frame text line)
-  (with-slots (w h line-render window) frame
-    (let* ((rendered-text (funcall (slot-value frame 'line-render)
-                                  (log-line-text text)
-                                  :ts (log-line-ts text)
-                                  :count (log-line-count text)
-                                  :allow-other-keys t))
-           (split-lines (split-line rendered-text w)))
-      (with-processed-attributes (log-line-attrs text) frame
-        (loop :for offset :from (length split-lines) :downto 1
-           :for text-line :in split-lines
-           :do (charms/ll:mvwaddstr window (- h line offset) 0 text-line)))
-      (length split-lines))))
+  (with-slots (w h window) frame
+    (render-log-line frame
+                     (log-line-line text)
+                     (- h line) w
+                     :ts (log-line-ts text)
+                     :count (log-line-count text)
+                     :allow-other-keys t)))
 
 (defmethod render-self ((frame log-frame))
-  (with-slots (window text h) frame
+  (with-slots (window offset lines h) frame
     (charms/ll:werase window)
     (let ((i 0))
-      (dolist (line text)
+      (dolist (line (nthcdr offset lines))
         (incf i (put-log-line frame line i))
         (when (>= i h)
           (return-from render-self))))))
