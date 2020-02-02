@@ -49,7 +49,8 @@
 
 (defun/frame clear frame (frame)
   (etypecase frame
-    (log-frame (setf (slot-value frame 'text) nil))
+    (log-frame (setf (slot-value frame 'lines) nil)
+               (setf (slot-value frame 'offset) 0))
     (canvas-frame (charms/ll:wclear (slot-value frame 'window)))))
 
 ;;; Tabs manupulations

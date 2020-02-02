@@ -32,7 +32,8 @@
       (when (frame-drawable-p frame)
         (cond ((or (null window)
                    (cffi:null-pointer-p window))
-               (setf window (charms/ll:newwin h w y x)))
+               (setf window (charms/ll:newwin h w y x))
+               (charms/ll:scrollok window 0))
               (t
                (ensure-ok (charms/ll:wresize window 1 1))
                (ensure-ok (charms/ll:mvwin window y x))
