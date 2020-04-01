@@ -4,7 +4,7 @@
 ;;;; Frame
 
 (defclass frame ()
-  ((parent :type (or frame null)
+  ((parent :type (or symbol null)
            :initarg :parent
            :initform nil)
    ;; Actual coordinates used by the layouter

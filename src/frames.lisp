@@ -186,7 +186,7 @@ COUNT - count of repeating lines when deduplication is enabled
   ((prompt :initform ""
            :initarg :prompt
            :writer set-prompt
-           :type (string trivial-types:function-designator null))
+           :type (or string trivial-types:function-designator null))
    (vedit :initform (vedit:make-vedit))))
 
 (defmethod frame-drawable-p ((frame edit-frame))
